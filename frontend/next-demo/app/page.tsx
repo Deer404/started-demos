@@ -1,9 +1,18 @@
-import Image from "next/image";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import axios from "axios";
+async function getData() {
+  const res = await axios.get("http://www.baidu.com/");
 
-export default function Home() {
+  return res.data;
+}
+
+export default async function Home() {
+  const data = await getData();
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      
+    <main className="flex flex-col">
+      Index
+      <Link href="/test">To Test {JSON.stringify(data ?? "")}</Link>
     </main>
   );
 }

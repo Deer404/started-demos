@@ -1,11 +1,13 @@
+
 export default function TestLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
     return (
-        <div className="p-4">
+        <section className="p-4">
+            <h1>Test</h1>
             {children}
-        </div>
+        </section>
     );
 }
