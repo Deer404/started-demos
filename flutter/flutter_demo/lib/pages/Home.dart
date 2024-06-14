@@ -53,35 +53,49 @@ class _HomePageState extends State<HomePage> {
         backgroundColor: Colors.blueGrey,
         // Here we take the value from the MyHomePage object that was created by
         // the App.build method, and use it to set our appbar title.
-        title: const Text("Home Page"),
+        title: const Text("Demo App"),
       ),
       body: _bottomNavPages[_selectedIndex],
-      bottomNavigationBar: BottomAppBar(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.home),
-              onPressed: () {
-                _onItemTapped(0);
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.search),
-              onPressed: () {
-                _onItemTapped(1);
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.account_circle),
-              onPressed: () {
-                _onItemTapped(2);
-              },
-            ),
-          ],
+      bottomNavigationBar: Theme(
+        data: ThemeData(useMaterial3: false),
+        child:BottomAppBar(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          height: 60,
+          notchMargin: 5,
+          shape: const CircularNotchedRectangle(),
+          color: Colors.white,
+          child: Row(
+            // crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.search),
+                onPressed: () {
+                  _onItemTapped(1);
+                },
+              ),
+              const SizedBox(), //中间位置空出
+              IconButton(
+                icon: const Icon(Icons.account_circle),
+                onPressed: () {
+                  _onItemTapped(2);
+                },
+              ),
+            ],
+          ),
         ),
       ),
+      floatingActionButton: SizedBox(
+        height: 60.0,
+        width: 60.0,
+        child: FloatingActionButton(
+          onPressed: () {},
+          shape: const CircleBorder(),
+          child: const Icon(Icons.add),
+        ),
+      ),
+      // 设置 floatingActionButton 在底部导航栏中间
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }
