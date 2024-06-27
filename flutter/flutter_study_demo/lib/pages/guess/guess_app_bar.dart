@@ -19,12 +19,14 @@ class GuessAppBar extends StatelessWidget implements PreferredSizeWidget {
       title: TextField(
         controller: controller,
         keyboardType: TextInputType.text,
+        textInputAction: TextInputAction.go,
         decoration: const InputDecoration(
           filled: true,
           fillColor: Color(0xffF3F6F9),
           constraints: BoxConstraints(maxHeight: 35),
           hintText: 'Search',
         ),
+        onSubmitted: (_) => onCheck(),
       ),
       actions: [
         IconButton(

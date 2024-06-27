@@ -11,10 +11,10 @@ class ResultNotice extends StatefulWidget {
   });
 
   @override
-  State<ResultNotice> createState() => _ResultNoticeState();
+  State<ResultNotice> createState() => ResultNoticeState();
 }
 
-class _ResultNoticeState extends State<ResultNotice>
+class ResultNoticeState extends State<ResultNotice>
     with SingleTickerProviderStateMixin {
   late AnimationController controller;
 
@@ -25,6 +25,11 @@ class _ResultNoticeState extends State<ResultNotice>
       vsync: this,
       duration: const Duration(milliseconds: 200),
     );
+    controller.forward();
+  }
+
+  void reset() {
+    controller.reset();
     controller.forward();
   }
 
