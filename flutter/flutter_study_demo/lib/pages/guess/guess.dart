@@ -11,14 +11,18 @@ class GuessPage extends StatefulWidget {
   State<GuessPage> createState() => _GuessPageState();
 }
 
-class _GuessPageState extends State<GuessPage> {
+class _GuessPageState extends State<GuessPage>
+    with SingleTickerProviderStateMixin {
   bool _guessing = false;
   int _value = 0;
   bool? _isBig;
 
   late final TextEditingController _guessCtrl = TextEditingController();
   late final Random _random = Random();
-  final GlobalKey<ResultNoticeState> _resultNoticeKey = GlobalKey();
+  late final AnimationController _animatedContainer = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 200),
+  );
   void _generateRandomValue() {
     setState(() {
       _guessing = true; // 点击按钮时，表示游戏开始
@@ -67,7 +71,7 @@ class _GuessPageState extends State<GuessPage> {
       _isBig = guessValue > _value;
     });
 
-    _resultNoticeKey.currentState?.reset();
+    _animatedContainer.forward(from: 0);
   }
 
   @override
@@ -100,14 +104,14 @@ class _GuessPageState extends State<GuessPage> {
                   ResultNotice(
                     color: Colors.redAccent,
                     info: "大了",
-                    key: _resultNoticeKey,
+                    controller: _animatedContainer,
                   ),
                 const Spacer(),
                 if (!_isBig!)
                   ResultNotice(
                     color: Colors.blueAccent,
                     info: "小了",
-                    key: _resultNoticeKey,
+                    controller: _animatedContainer,
                   )
               ],
             ),
