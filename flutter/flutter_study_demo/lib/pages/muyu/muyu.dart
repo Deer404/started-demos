@@ -4,10 +4,12 @@ import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_study_demo/pages/muyu/animate_text.dart';
+import 'package:flutter_study_demo/pages/muyu/audio_option_panel.dart';
 import 'package:flutter_study_demo/pages/muyu/count_panel.dart';
+import 'package:flutter_study_demo/pages/muyu/image_option_panel.dart';
 import 'package:flutter_study_demo/pages/muyu/models/image_option.dart';
 import 'package:flutter_study_demo/pages/muyu/muyu_assets_image.dart';
-import 'package:flutter_study_demo/pages/muyu/options/select_image.dart';
+import 'package:flutter_study_demo/pages/muyu/options/audio_option.dart';
 
 class MeritRecord {
   final String id;
@@ -31,22 +33,6 @@ class MeritRecord {
       };
 }
 
-class AudioOption {
-  final String name;
-  final String src;
-
-  const AudioOption(this.name, this.src);
-}
-
-class ImageOptions {
-  final String name;
-  final String src;
-  final int min;
-  final int max;
-
-  const ImageOptions(this.name, this.src, this.min, this.max);
-}
-
 class MuyuPage extends StatefulWidget {
   const MuyuPage({super.key});
 
@@ -54,9 +40,11 @@ class MuyuPage extends StatefulWidget {
   State<MuyuPage> createState() => _MuyuPageState();
 }
 
-class _MuyuPageState extends State<MuyuPage> {
+class _MuyuPageState extends State<MuyuPage>
+    with SingleTickerProviderStateMixin {
   late final AudioPool? pool;
   late final Random _random = Random();
+  late final AnimationController _controller;
   int _counter = 0;
   int _cruValue = 0;
 
@@ -65,6 +53,13 @@ class _MuyuPageState extends State<MuyuPage> {
     ImageOption('尊享版', 'assets/images/muyu2.png', 3, 6),
   ];
   int _activeImageIndex = 0;
+  final List<AudioOption> audioOptions = const [
+    AudioOption('音效1', 'muyu_1.mp3'),
+    AudioOption('音效2', 'muyu_2.mp3'),
+    AudioOption('音效3', 'muyu_3.mp3'),
+  ];
+
+  int _activeAudioIndex = 0;
   String get activeImage => imageOptions[_activeImageIndex].src;
 
 // 敲击是增加值
@@ -76,7 +71,18 @@ class _MuyuPageState extends State<MuyuPage> {
 
   void _toHistory() {}
 
-  void _onTapSwitchAudio() {}
+  void _onTapSwitchAudio() {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (BuildContext context) {
+        return AudioOptionPanel(
+          audioOptions: audioOptions,
+          activeIndex: _activeAudioIndex,
+          onSelect: _onSelectAudio,
+        );
+      },
+    );
+  }
 
   void _onTapSwitchImage() {
     showCupertinoModalPopup(
@@ -99,6 +105,7 @@ class _MuyuPageState extends State<MuyuPage> {
 
   void _onKnock() {
     pool?.start();
+    _controller.forward(from: 0);
     setState(() {
       _cruValue = knockValue;
       _counter += _cruValue;
@@ -109,6 +116,10 @@ class _MuyuPageState extends State<MuyuPage> {
   void initState() {
     super.initState();
     _initAudioPool();
+    _controller = AnimationController(
+      duration: const Duration(seconds: 2),
+      vsync: this,
+    );
   }
 
   void _initAudioPool() async {
@@ -148,70 +159,15 @@ class _MuyuPageState extends State<MuyuPage> {
                   onTap: _onKnock,
                 ),
                 if (_counter != 0)
-                  Positioned(top: 0, child: AnimateText(text: "功德+$_cruValue"))
+                  Positioned(
+                      top: 0,
+                      child: AnimateText(
+                        text: "功德+$_cruValue",
+                        controller: _controller,
+                      ))
               ],
             )),
           ],
         ));
-  }
-}
-
-class ImageOptionPanel extends StatelessWidget {
-  final List<ImageOption> imageOptions;
-  final ValueChanged<int> onSelect;
-  final int activeIndex;
-
-  const ImageOptionPanel({
-    super.key,
-    required this.imageOptions,
-    required this.activeIndex,
-    required this.onSelect,
-  });
-
-  Widget _buildByIndex(int index) {
-    bool active = index == activeIndex;
-    return GestureDetector(
-      onTap: () => onSelect(index),
-      child: ImageOptionItem(
-        option: imageOptions[index],
-        active: active,
-      ),
-    );
-  }
-
-  @override
-  Widget build(Object context) {
-    const TextStyle labelStyle =
-        TextStyle(fontSize: 16, fontWeight: FontWeight.bold);
-    const EdgeInsets padding =
-        EdgeInsets.symmetric(horizontal: 8.0, vertical: 16);
-    return Material(
-      child: SizedBox(
-        height: 300,
-        child: Column(
-          children: [
-            Container(
-              height: 46,
-              alignment: Alignment.center,
-              child: const Text(
-                "选择木鱼",
-                style: labelStyle,
-              ),
-            ),
-            Expanded(
-                child: Padding(
-              padding: padding,
-              child: Row(
-                children: [
-                  Expanded(child: _buildByIndex(0)),
-                  const SizedBox(width: 10),
-                  Expanded(child: _buildByIndex(1)),
-                ],
-              ),
-            ))
-          ],
-        ),
-      ),
-    );
   }
 }

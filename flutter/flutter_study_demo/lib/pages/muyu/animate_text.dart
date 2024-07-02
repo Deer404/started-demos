@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 
 class AnimateText extends StatefulWidget {
   final String text;
-  const AnimateText({Key? key, required this.text}) : super(key: key);
+  final AnimationController controller;
+
+  const AnimateText({super.key, required this.text, required this.controller});
 
   @override
   _AnimateTextState createState() => _AnimateTextState();
@@ -10,7 +12,6 @@ class AnimateText extends StatefulWidget {
 
 class _AnimateTextState extends State<AnimateText>
     with SingleTickerProviderStateMixin {
-  late AnimationController controller;
   late Animation<double> opacity;
   late Animation<Offset> position;
   late Animation<double> scale;
@@ -18,26 +19,19 @@ class _AnimateTextState extends State<AnimateText>
   @override
   void initState() {
     super.initState();
-    controller = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
-    );
-    opacity = Tween<double>(begin: 1.0, end: 0.0).animate(controller);
+    opacity = Tween<double>(begin: 1.0, end: 0.0).animate(widget.controller);
     position = Tween<Offset>(begin: const Offset(0, 2), end: Offset.zero)
-        .animate(controller);
-    scale = Tween<double>(begin: 1.0, end: 0.9).animate(controller);
-    controller.forward();
+        .animate(widget.controller);
+    scale = Tween<double>(begin: 1.0, end: 0.9).animate(widget.controller);
   }
 
   @override
   void didUpdateWidget(covariant AnimateText oldWidget) {
     super.didUpdateWidget(oldWidget);
-    controller.forward(from: 0);
   }
 
   @override
   void dispose() {
-    controller.dispose();
     super.dispose();
   }
 
