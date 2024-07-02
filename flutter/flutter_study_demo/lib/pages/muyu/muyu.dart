@@ -61,6 +61,7 @@ class _MuyuPageState extends State<MuyuPage>
 
   int _activeAudioIndex = 0;
   String get activeImage => imageOptions[_activeImageIndex].src;
+  String get activeAudio => audioOptions[_activeAudioIndex].src;
 
 // 敲击是增加值
   int get knockValue {
@@ -81,6 +82,16 @@ class _MuyuPageState extends State<MuyuPage>
           onSelect: _onSelectAudio,
         );
       },
+    );
+  }
+
+  void _onSelectAudio(int value) async {
+    Navigator.of(context).pop();
+    if (value == _activeAudioIndex) return;
+    _activeAudioIndex = value;
+    pool = await FlameAudio.createPool(
+      activeAudio,
+      maxPlayers: 1,
     );
   }
 
