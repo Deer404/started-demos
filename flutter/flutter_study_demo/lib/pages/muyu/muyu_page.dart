@@ -8,30 +8,11 @@ import 'package:flutter_study_demo/pages/muyu/audio_option_panel.dart';
 import 'package:flutter_study_demo/pages/muyu/count_panel.dart';
 import 'package:flutter_study_demo/pages/muyu/image_option_panel.dart';
 import 'package:flutter_study_demo/pages/muyu/models/image_option.dart';
+import 'package:flutter_study_demo/pages/muyu/models/metrit_record.dart';
 import 'package:flutter_study_demo/pages/muyu/muyu_assets_image.dart';
 import 'package:flutter_study_demo/pages/muyu/options/audio_option.dart';
-
-class MeritRecord {
-  final String id;
-  final int timestamp;
-  final int value;
-  final String image;
-  final String audio;
-
-  MeritRecord(
-      {required this.id,
-      required this.timestamp,
-      required this.value,
-      required this.image,
-      required this.audio});
-  Map<String, dynamic> toJson() => {
-        'id': id,
-        'timestamp': timestamp,
-        'value': value,
-        'image': image,
-        'audio': audio
-      };
-}
+import 'package:flutter_study_demo/pages/muyu/record_history.dart';
+import 'package:uuid/v4.dart';
 
 class MuyuPage extends StatefulWidget {
   const MuyuPage({super.key});
@@ -59,6 +40,8 @@ class _MuyuPageState extends State<MuyuPage>
     AudioOption('音效3', 'muyu_3.mp3'),
   ];
 
+  final List<MeritRecord> _records = [];
+
   int _activeAudioIndex = 0;
   String get activeImage => imageOptions[_activeImageIndex].src;
   String get activeAudio => audioOptions[_activeAudioIndex].src;
@@ -70,7 +53,10 @@ class _MuyuPageState extends State<MuyuPage>
     return min + _random.nextInt(max + 1 - min);
   }
 
-  void _toHistory() {}
+  void _toHistory() {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (_) => RecordHistory(records: _records.reversed.toList())));
+  }
 
   void _onTapSwitchAudio() {
     showCupertinoModalPopup(
@@ -120,6 +106,13 @@ class _MuyuPageState extends State<MuyuPage>
     setState(() {
       _cruValue = knockValue;
       _counter += _cruValue;
+      String id = UuidV4().generate();
+      _records.add(MeritRecord(
+          id: id,
+          timestamp: DateTime.now().millisecondsSinceEpoch,
+          value: _cruValue,
+          image: activeImage,
+          audio: activeAudio));
     });
   }
 

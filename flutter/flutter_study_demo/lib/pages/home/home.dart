@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_study_demo/pages/guess/guess.dart';
-import 'package:flutter_study_demo/pages/muyu/muyu.dart';
+import 'package:flutter_study_demo/pages/muyu/muyu_page.dart';
 import 'package:flutter_study_demo/widgets/app_bottom_bar.dart';
 import 'package:flutter_study_demo/widgets/app_navigation.dart';
 

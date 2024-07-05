@@ -1,0 +1,13 @@
+{
+  "name": "chat-server",
+  "scripts": {
+    "dev": "bun run --port 8080 --hot src/index.ts"
+  },
+  "dependencies": {
+    "hono": "^4.4.11",
+    "nanoid": "^5.0.7"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
