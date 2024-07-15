@@ -38,9 +38,15 @@ class _MuyuAssetsImageState extends State<MuyuAssetsImage>
         },
         child: ScaleTransition(
             scale: scale,
-            child: Image.asset(
-              widget.image,
+            child: Container(
               height: 200,
+              width: 200,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: AssetImage(widget.image),
+                  fit: BoxFit.cover,
+                ),
+              ),
             )),
       ),
     );

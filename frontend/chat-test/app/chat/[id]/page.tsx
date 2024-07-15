@@ -33,12 +33,12 @@ export default function Page({ params }: ChatPageProp) {
     "http://192.168.160.93:8080/messages",
     fetcher
   );
-  const [optimisticMessage, addOptimisticMessage] = useOptimistic(
-    messages,
-    (state, newMessage: Message & { sending?: boolean }) => {
-      return [...(state ?? []), { ...newMessage, sending: true }];
-    }
-  );
+  // const [optimisticMessage, addOptimisticMessage] = useOptimistic(
+  //   messages,
+  //   (state, newMessage: Message & { sending?: boolean }) => {
+  //     return [...(state ?? []), { ...newMessage, sending: true }];
+  //   }
+  // );
 
   const handleClick = () => {
     if (message) {
@@ -49,7 +49,7 @@ export default function Page({ params }: ChatPageProp) {
         name: name ?? "Staff",
         date: new Date().toISOString(),
       };
-      addOptimisticMessage(sendMessage);
+      // addOptimisticMessage(sendMessage);
       sendMessages(sendMessage).then(() => {
         ref.current?.scrollToBottom();
       });
@@ -82,11 +82,7 @@ export default function Page({ params }: ChatPageProp) {
       <div className="bg-primary text-primary-foreground px-4 py-3 flex items-center">
         <h2 className="text-lg font-medium">Chat with John</h2>
       </div>
-      <MessageList
-        id={params.id ?? ""}
-        ref={ref}
-        messages={optimisticMessage ?? []}
-      />
+      <MessageList id={params.id ?? ""} ref={ref} messages={messages ?? []} />
       <div className="bg-muted px-4 py-3 flex items-center gap-2">
         <Textarea
           value={message}

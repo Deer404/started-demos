@@ -155,20 +155,21 @@ class _MuyuPageState extends State<MuyuPage>
                     onTapSwitchAudio: _onTapSwitchAudio,
                     onTapSwitchImage: _onTapSwitchImage)),
             Expanded(
-                child: Stack(
-              alignment: Alignment.topCenter,
+                child: Column(
+              // alignment: Alignment.topCenter,
               children: [
-                MuyuAssetsImage(
-                  image: activeImage,
-                  onTap: _onKnock,
-                ),
                 if (_counter != 0)
                   Positioned(
                       top: 0,
                       child: AnimateText(
                         text: "功德+$_cruValue",
                         controller: _controller,
-                      ))
+                      )),
+                const Spacer(),
+                MuyuAssetsImage(
+                  image: activeImage,
+                  onTap: _onKnock,
+                ),
               ],
             )),
           ],

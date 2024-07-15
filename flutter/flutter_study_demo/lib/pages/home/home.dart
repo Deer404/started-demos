@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_study_demo/pages/guess/guess.dart';
 import 'package:flutter_study_demo/pages/muyu/muyu_page.dart';
+import 'package:flutter_study_demo/pages/paper/paper.dart';
 import 'package:flutter_study_demo/widgets/app_bottom_bar.dart';
 import 'package:flutter_study_demo/widgets/app_navigation.dart';
 
@@ -12,12 +13,13 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _currentIndex = 0;
+  int _currentIndex = 2;
   final pageController = PageController();
-  final pageList = <Widget>[const GuessPage(), const MuyuPage()];
+  final pageList = <Widget>[const GuessPage(), const MuyuPage(), const Paper()];
   final List<MenuData> menus = [
-    const MenuData(icon: Icons.home, label: 'Home'),
-    const MenuData(icon: Icons.settings, label: 'Settings'),
+    const MenuData(icon: Icons.home, label: 'Guess'),
+    const MenuData(icon: Icons.mood, label: 'Muyu'),
+    const MenuData(icon: Icons.color_lens, label: 'Paper'),
   ];
 
   void _onMenuTap(int index) {
