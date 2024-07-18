@@ -62,7 +62,7 @@ class ConfirmDialog extends StatelessWidget {
           onPressed: () => Navigator.of(context).pop(),
           child: Text(cancelText),
         ),
-        const SizedBox(width: 10.0), // Add some space (10 pixels
+        const SizedBox(width: 5.0), // Add some space (10 pixels
         TextButton(
           onPressed: () {
             onConfirm();

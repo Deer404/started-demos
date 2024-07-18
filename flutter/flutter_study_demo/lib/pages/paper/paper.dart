@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_study_demo/pages/paper/color_selector.dart';
 import 'package:flutter_study_demo/pages/paper/models/line.dart';
@@ -36,6 +38,8 @@ class _PaperState extends State<Paper> {
     return Scaffold(
       appBar: PaperAppBar(
         onClear: _showClearDiglog,
+        onBack: _lines.isEmpty ? null : _back,
+        onRevocation: _historyLines.isEmpty ? null : _revocation,
       ),
       body: Stack(
         children: [
@@ -43,7 +47,8 @@ class _PaperState extends State<Paper> {
             onPanStart: _onPanStart,
             onPanUpdate: _onPanUpdate,
             child: CustomPaint(
-              painter: PaperPainter(lines: _lines),
+              painter:
+                  PaperPainter(lines: _lines, pointMode: PointMode.polygon),
               child: ConstrainedBox(constraints: const BoxConstraints.expand()),
             ),
           ),
@@ -93,8 +98,13 @@ class _PaperState extends State<Paper> {
   }
 
   void _onPanUpdate(DragUpdateDetails details) {
-    _lines.last.points.add(details.localPosition);
-    setState(() {});
+    print("====details:${details.localPosition}====");
+    Offset point = details.localPosition;
+    double distrance = (point - _lines.last.points.last).distance;
+    if (distrance > 5) {
+      _lines.last.points.add(details.localPosition);
+      setState(() {});
+    }
   }
 
   void _onSelectStorkWidth(int index) {
@@ -111,5 +121,17 @@ class _PaperState extends State<Paper> {
         _activeColorIndex = index;
       });
     }
+  }
+
+  void _back() {
+    Line line = _lines.removeLast();
+    _historyLines.add(line);
+    setState(() {});
+  }
+
+  void _revocation() {
+    Line line = _historyLines.removeLast();
+    _lines.add(line);
+    setState(() {});
   }
 }

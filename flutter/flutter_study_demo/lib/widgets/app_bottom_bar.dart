@@ -26,29 +26,58 @@ class AppBottomBar extends StatelessWidget {
     required this.menus,
   });
 
+  // @override
+  // Widget build(BuildContext context) {
+  //   return BottomAppBar(
+  //     elevation: 0.0,
+  //     shape: shape,
+  //     child: Row(
+  //       mainAxisAlignment: MainAxisAlignment.spaceAround,
+  //       children: [
+  //         for (var (index, menu) in menus.indexed)
+  //           _buildItemByMenuMeta(menu, index),
+  //       ],
+  //     ),
+  //   );
+  // }
+
   @override
   Widget build(BuildContext context) {
-    return BottomAppBar(
-      elevation: 0.0,
-      shape: shape,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          for (var (index, menu) in menus.indexed)
-            _buildItemByMenuMeta(menu, index),
-        ],
-      ),
+    return BottomNavigationBar(
+      backgroundColor: Colors.white,
+      onTap: onItemTap,
+      currentIndex: currentIndex,
+      elevation: 3,
+      type: BottomNavigationBarType.fixed,
+      iconSize: 22,
+      selectedItemColor: Theme.of(context).primaryColor,
+      selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
+      showUnselectedLabels: true,
+      showSelectedLabels: true,
+      items: menus.map(_buildItemByMenuMeta).toList(),
     );
   }
 
-  IconButton _buildItemByMenuMeta(MenuData menu, int index) {
-    return IconButton(
+  BottomNavigationBarItem _buildItemByMenuMeta(MenuData menu) {
+    return BottomNavigationBarItem(
+      label: menu.label,
       icon: Icon(menu.icon),
-      onPressed: () {
-        if (onItemTap != null) {
-          onItemTap!(index);
-        }
-      },
+      // onPressed: () {
+      //   if (onItemTap != null) {
+      //     onItemTap!(index);
+      //   }
+      // },
     );
   }
+
+  // IconButton _buildItemByMenuMeta(MenuData menu, int index) {
+  //   return IconButton(
+  //     icon: Icon(menu.icon),
+  //     onPressed: () {
+  //       if (onItemTap != null) {
+  //         onItemTap!(index);
+  //       }
+  //     },
+  //   );
+  // }
 }

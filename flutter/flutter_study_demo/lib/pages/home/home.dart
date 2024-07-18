@@ -17,9 +17,9 @@ class _HomePageState extends State<HomePage> {
   final pageController = PageController();
   final pageList = <Widget>[const GuessPage(), const MuyuPage(), const Paper()];
   final List<MenuData> menus = [
-    const MenuData(icon: Icons.home, label: 'Guess'),
-    const MenuData(icon: Icons.mood, label: 'Muyu'),
-    const MenuData(icon: Icons.color_lens, label: 'Paper'),
+    const MenuData(label: '猜数字', icon: Icons.question_mark),
+    const MenuData(label: '电子木鱼', icon: Icons.my_library_music_outlined),
+    const MenuData(label: '白板绘制', icon: Icons.palette_outlined),
   ];
 
   void _onMenuTap(int index) {
