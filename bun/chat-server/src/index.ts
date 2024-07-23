@@ -62,9 +62,7 @@ app.post("/message", async (c) => {
   };
   messageList.push(msg);
   // server.publish(topic, JSON.stringify(messageList));
-  return c.json({
-    data: messageList,
-  });
+  return c.json(messageList);
 });
 
 export default app;
