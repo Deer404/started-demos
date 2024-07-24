@@ -16,7 +16,7 @@ type VoidCallback = () => void;
 // 创建一个ViewTransitionsContext，默认值为一个空函数
 const ViewTransitionsContext = createContext<
   Dispatch<SetStateAction<VoidCallback | null>>
->(() => () => {});
+>(() => {});
 
 // 定义一个ViewTransitions组件，接受children作为参数并保证其只读
 export function ViewTransitions({
