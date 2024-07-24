@@ -73,7 +73,7 @@ export function TransitionLink(props: React.ComponentProps<typeof NextLink>) {
         );
       }
     },
-    [props.onClick, href, as, replace, scroll] // 依赖项数组
+    [props, router, replace, href, scroll, finishViewTransition] // 依赖项数组
   );
 
   return <NextLink {...props} onClick={onClick} />; // 返回经过自定义onClick方法处理的NextLink组件
