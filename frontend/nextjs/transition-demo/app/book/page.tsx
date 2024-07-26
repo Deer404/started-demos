@@ -1,7 +1,7 @@
 import { Suspense } from "react";
 import PostBook from "./components/PostBook";
 import SkeletonLoader from "./components/SkeletonCard";
-import { TransitionLink } from "@/components/transition/TransitionLink";
+import { TransitionLink } from "nextjs-view-transition";
 export default async function BooksPage() {
   return (
     <main className="flex flex-col items-center min-h-screen py-10 gap-y-10">

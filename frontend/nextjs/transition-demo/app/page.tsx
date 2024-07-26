@@ -1,6 +1,5 @@
 import LinkTransition from "@/components/LinkTransition";
-import { TransitionLink } from "@/components/transition/TransitionLink";
-
+import { TransitionLink } from "nextjs-view-transition";
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col p-24 items-center gap-16">
