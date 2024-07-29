@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, use } from "react";
+import { useEffect, useRef, useState, use, useLayoutEffect } from "react";
 import { usePathname } from "next/navigation";
 
 export function useBrowserNativeTransitions() {
@@ -72,7 +72,7 @@ export function useBrowserNativeTransitions() {
     transitionRef.current = currentViewTransition;
   }, [currentViewTransition]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     // 当前路由组件实际挂载时，完成视图转换
     currentPathname.current = pathname;
     if (transitionRef.current) {

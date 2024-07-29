@@ -79,6 +79,7 @@
   animation: 1000ms cubic-bezier(0.4, 0, 0.2, 1) both fade-in;
 }
 
+a,
 button,
 label[for],
 [href] [class*="group-hover"] {
@@ -94,17 +95,6 @@ label[for],
   animation-range-start: 0;
   animation-range-end: 15%;
   transform-style: preserve-3d;
-}
-
-@keyframes fade-out {
-  from {
-    opacity: 1;
-    transform: perspective(100px);
-  }
-  to {
-    opacity: 0;
-    transform: perspective(100px) rotateX(-90deg);
-  }
 }
 
 @keyframes fade-in {

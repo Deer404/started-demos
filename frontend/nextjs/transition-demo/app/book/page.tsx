@@ -8,7 +8,13 @@ export default async function BooksPage() {
       <TransitionLink href="/" className=" self-start p-5">
         {"<<"}
       </TransitionLink>
-      <h1 className="">Books</h1>
+      <h1
+        style={{
+          viewTransitionName: "book-4090",
+        }}
+      >
+        Books
+      </h1>
 
       <Suspense fallback={<SkeletonLoader />}>
         <PostBook />

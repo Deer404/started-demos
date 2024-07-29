@@ -1,5 +1,6 @@
 "use server";
 
+import { BASE_URL } from "@/lib/constant";
 import { CLIENT_ID } from "../constants";
 import { Message, SendMessageParams } from "../types/message";
 
@@ -15,7 +16,7 @@ export async function sendMessages<T>({
     date: date,
     userId: userId,
   };
-  const response = await fetch("http://192.168.160.93:8080/message", {
+  const response = await fetch(`${BASE_URL}/message`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

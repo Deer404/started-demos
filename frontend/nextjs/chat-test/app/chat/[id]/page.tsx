@@ -6,33 +6,25 @@
 "use client";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import {
-  useEffect,
-  useLayoutEffect,
-  useOptimistic,
-  useRef,
-  useState,
-} from "react";
+import { useEffect, useRef, useState } from "react";
 import MessageList from "@/app/components/MessageList";
 import { sendMessages } from "@/app/actions/message";
 import { Input } from "@/components/ui/input";
 import { fetcher } from "@/app/constants";
 import useSWR from "swr";
 import { Message } from "@/app/types/message";
+import { BASE_URL } from "@/lib/constant";
 type ChatPageProp = {
   params: {
     id: string;
   };
 };
-
+const getMsgListUrl = `${BASE_URL}/messages`;
 export default function Page({ params }: ChatPageProp) {
   const [message, setMessage] = useState("");
   const [name, setName] = useState<string | null>(null);
   const ref = useRef({ scrollToBottom: () => {} });
-  const { data: messages, mutate } = useSWR<Message[]>(
-    "http://192.168.160.93:8080/messages",
-    fetcher
-  );
+  const { data: messages, mutate } = useSWR<Message[]>(getMsgListUrl, fetcher);
   // const [optimisticMessage, addOptimisticMessage] = useOptimistic(
   //   messages,
   //   (state, newMessage: Message & { sending?: boolean }) => {
@@ -64,7 +56,7 @@ export default function Page({ params }: ChatPageProp) {
   }, [mutate]);
 
   return (
-    <div className="flex flex-col h-full max-h-[600px] w-full max-w-xl mx-auto bg-background rounded-lg shadow-lg overflow-hidden">
+    <div className="flex flex-col p-5 h-full max-h-[600px] w-full max-w-2xl mx-auto bg-background rounded-lg shadow-lg overflow-hidden">
       <div className="flex flex-row items-center gap gap-2">
         <span>Name:</span>
         <Input

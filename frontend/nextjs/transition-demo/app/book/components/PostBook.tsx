@@ -11,7 +11,7 @@ import { bookData } from "@/mock/book";
 import { Book } from "@/types/book";
 
 async function getBooks(): Promise<Book[]> {
-  await sleep(1);
+  await sleep(1000);
   return bookData;
 }
 
