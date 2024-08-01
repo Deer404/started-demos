@@ -1,7 +1,7 @@
 export type Message = {
   name: string;
   message: string;
-  date: string;
+  createdAt: number;
   userId?: string;
 };
 export type SendMessageParams = Omit<Message, "date">;

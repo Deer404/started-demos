@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useEffect, useRef, useState } from "react";
 import MessageList from "@/app/components/MessageList";
-import { sendMessages } from "@/app/actions/message";
+import { clearMessages, sendMessages } from "@/app/actions/message";
 import { Input } from "@/components/ui/input";
 import { fetcher } from "@/app/constants";
 import useSWR from "swr";
@@ -35,16 +35,21 @@ export default function Page({ params }: ChatPageProp) {
   const handleClick = () => {
     if (message) {
       setMessage("");
-      const sendMessage = {
+      const msg = {
         message,
         userId: params.id,
         name: name ?? "Staff",
-        date: new Date().toISOString(),
+        createdAt: new Date().getTime(),
       };
+      console.log("msg", msg);
       // addOptimisticMessage(sendMessage);
-      sendMessages(sendMessage).then(() => {
-        ref.current?.scrollToBottom();
-      });
+      sendMessages(msg)
+        .then(() => {
+          ref.current?.scrollToBottom();
+        })
+        .catch((e) => {
+          console.error(e);
+        });
     }
   };
 
@@ -67,9 +72,18 @@ export default function Page({ params }: ChatPageProp) {
           value={name ?? ""}
         />
       </div>
-      <div className="py-2 flex">
+      <div className="py-2 flex items-center">
         <span>userName:</span>
         <span>{name ?? "Staff"}</span>
+        <div className="flex flex-row justify-end items-center flex-1 pr-1">
+          <Button
+            onClick={() => {
+              clearMessages();
+            }}
+          >
+            Clear
+          </Button>
+        </div>
       </div>
       <div className="bg-primary text-primary-foreground px-4 py-3 flex items-center">
         <h2 className="text-lg font-medium">Chat with John</h2>

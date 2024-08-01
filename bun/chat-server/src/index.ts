@@ -19,6 +19,7 @@ type Message = {
   name: string;
   message: string;
   userId: string;
+  createdAt: number;
 };
 const messageList: Message[] = [];
 
@@ -26,6 +27,7 @@ const messageSchema = z.object({
   name: z.string(),
   message: z.string(),
   userId: z.string(),
+  createdAt: z.number(),
 });
 
 const messageListSchema = messageSchema
@@ -55,12 +57,12 @@ const messageListSchema = messageSchema
 //   })
 // );
 
-app.use(
-  "/*",
-  cors({
+app.use("/*", async (c, next) => {
+  const corsMiddlewareHandler = cors({
     origin: "*",
-  })
-);
+  });
+  return corsMiddlewareHandler(c as any, next);
+});
 
 const getMessageRoute = createRoute({
   method: "get",
@@ -105,6 +107,7 @@ const postMessageRoute = createRoute({
 });
 
 app.openapi(postMessageRoute, async (c) => {
+  console.log("收到消息");
   const message: Omit<Message, "id"> = c.req.valid("json");
   const msg = {
     ...message,
@@ -112,6 +115,11 @@ app.openapi(postMessageRoute, async (c) => {
   };
   messageList.push(msg);
   // server.publish(topic, JSON.stringify(messageList));
+  return c.json(messageList);
+});
+
+app.delete("/api/clear", (c) => {
+  messageList.length = 0;
   return c.json(messageList);
 });
 

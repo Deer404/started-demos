@@ -1,4 +1,4 @@
-// /Users/ipt-s02/development/workspace/started-demos/bun/chat-server/node_modules/hono/dist/middleware/cors/index.js
+// node_modules/hono/dist/middleware/cors/index.js
 var cors = (options) => {
   const defaults = {
     origin: "*",
@@ -74,7 +74,7 @@ var cors = (options) => {
 // node_modules/.pnpm/nanoid@5.0.7/node_modules/nanoid/url-alphabet/index.js
 var urlAlphabet = "useandom-26T198340PX75pxJACKVERYMINDBUSHWOLF_GQZbfghjklqvwyzrict";
 
-// /Users/ipt-s02/development/workspace/started-demos/bun/chat-server/node_modules/nanoid/index.browser.js
+// /Users/ipt-s02/development/workspace/deer404/started-demos/bun/chat-server/node_modules/nanoid/index.browser.js
 var nanoid = (size = 21) => {
   let id = "";
   let bytes = crypto.getRandomValues(new Uint8Array(size));
@@ -187,7 +187,7 @@ var resolveCallback = async (str, phase, preserveCallbacks, context, buffer) => 
   }
 };
 
-// /Users/ipt-s02/development/workspace/started-demos/bun/chat-server/node_modules/.pnpm/@hono+swagger-ui@0.4.0_hono@4.5.2/node_modules/hono/dist/helper/html/index.js
+// /Users/ipt-s02/development/workspace/deer404/started-demos/bun/chat-server/node_modules/.pnpm/@hono+swagger-ui@0.4.0_hono@4.5.2/node_modules/hono/dist/helper/html/index.js
 var html2 = (strings, ...values) => {
   const buffer = [""];
   for (let i = 0, len = strings.length - 1;i < len; i++) {
@@ -223,7 +223,7 @@ var html2 = (strings, ...values) => {
   return buffer.length === 1 ? "callbacks" in buffer ? raw(resolveCallbackSync(raw(buffer[0], buffer.callbacks))) : raw(buffer[0]) : stringBufferToString(buffer, buffer.callbacks);
 };
 
-// /Users/ipt-s02/development/workspace/started-demos/bun/chat-server/node_modules/@hono/swagger-ui/dist/index.js
+// /Users/ipt-s02/development/workspace/deer404/started-demos/bun/chat-server/node_modules/@hono/swagger-ui/dist/index.js
 var RENDER_TYPE = {
   STRING_ARRAY: "string_array",
   STRING: "string",
@@ -336,7 +336,7 @@ var middleware = (options) => async (c) => {
     `);
 };
 
-// /Users/ipt-s02/development/workspace/started-demos/bun/chat-server/node_modules/.pnpm/@hono+zod-openapi@0.15.1_hono@4.5.2_zod@3.23.8/node_modules/@asteasolutions/zod-to-openapi/dist/index.mjs
+// /Users/ipt-s02/development/workspace/deer404/started-demos/bun/chat-server/node_modules/.pnpm/@hono+zod-openapi@0.15.1_hono@4.5.2_zod@3.23.8/node_modules/@asteasolutions/zod-to-openapi/dist/index.mjs
 var __rest = function(s, e) {
   var t = {};
   for (var p in s)
@@ -1495,7 +1495,7 @@ class OpenApiGeneratorV31 {
   }
 }
 
-// /Users/ipt-s02/development/workspace/started-demos/bun/chat-server/node_modules/.pnpm/@hono+zod-openapi@0.15.1_hono@4.5.2_zod@3.23.8/node_modules/hono/dist/utils/url.js
+// /Users/ipt-s02/development/workspace/deer404/started-demos/bun/chat-server/node_modules/.pnpm/@hono+zod-openapi@0.15.1_hono@4.5.2_zod@3.23.8/node_modules/hono/dist/utils/url.js
 var splitPath = (path) => {
   const paths = path.split("/");
   if (paths[0] === "") {
@@ -1863,7 +1863,7 @@ var validator = (target, validationFunc) => {
   };
 };
 
-// /Users/ipt-s02/development/workspace/started-demos/bun/chat-server/node_modules/.pnpm/@hono+zod-openapi@0.15.1_hono@4.5.2_zod@3.23.8/node_modules/@hono/zod-validator/dist/esm/index.js
+// /Users/ipt-s02/development/workspace/deer404/started-demos/bun/chat-server/node_modules/.pnpm/@hono+zod-openapi@0.15.1_hono@4.5.2_zod@3.23.8/node_modules/@hono/zod-validator/dist/esm/index.js
 var zValidator = (target, schema, hook) => validator(target, async (value, c) => {
   const result = await schema.safeParseAsync(value);
   if (hook) {
@@ -3139,7 +3139,7 @@ var Hono2 = class extends Hono {
   }
 };
 
-// /Users/ipt-s02/development/workspace/started-demos/bun/chat-server/node_modules/.pnpm/@hono+zod-openapi@0.15.1_hono@4.5.2_zod@3.23.8/node_modules/zod/lib/index.mjs
+// /Users/ipt-s02/development/workspace/deer404/started-demos/bun/chat-server/node_modules/.pnpm/@hono+zod-openapi@0.15.1_hono@4.5.2_zod@3.23.8/node_modules/zod/lib/index.mjs
 var setErrorMap = function(map) {
   overrideErrorMap = map;
 };
@@ -7001,7 +7001,7 @@ var z = Object.freeze({
   ZodError
 });
 
-// /Users/ipt-s02/development/workspace/started-demos/bun/chat-server/node_modules/@hono/zod-openapi/dist/index.mjs
+// /Users/ipt-s02/development/workspace/deer404/started-demos/bun/chat-server/node_modules/@hono/zod-openapi/dist/index.mjs
 var addBasePathToDocument = function(document, basePath) {
   const updatedPaths = {};
   Object.keys(document.paths).forEach((path) => {
@@ -7149,14 +7149,18 @@ var messageList = [];
 var messageSchema = z.object({
   name: z.string(),
   message: z.string(),
-  userId: z.string()
+  userId: z.string(),
+  createdAt: z.number()
 });
 var messageListSchema = messageSchema.extend({
   id: z.string()
 }).array();
-app.use("/*", cors({
-  origin: "*"
-}));
+app.use("/*", async (c, next) => {
+  const corsMiddlewareHandler = cors({
+    origin: "*"
+  });
+  return corsMiddlewareHandler(c, next);
+});
 var getMessageRoute = createRoute({
   method: "get",
   path: "/api/messages",
@@ -7198,12 +7202,17 @@ var postMessageRoute = createRoute({
   }
 });
 app.openapi(postMessageRoute, async (c) => {
+  console.log("\u6536\u5230\u6D88\u606F");
   const message = c.req.valid("json");
   const msg = {
     ...message,
     id: nanoid()
   };
   messageList.push(msg);
+  return c.json(messageList);
+});
+app.delete("/api/clear", (c) => {
+  messageList.length = 0;
   return c.json(messageList);
 });
 app.doc("/doc", {

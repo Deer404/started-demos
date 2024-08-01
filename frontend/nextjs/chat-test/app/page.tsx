@@ -1,10 +1,8 @@
 import Link from "next/link";
 import { useMemo } from "react";
-
+export const revalidate = 0;
 export default function ChatPage() {
-  const randomId = useMemo(() => {
-    return Math.random().toString(36).substring(7);
-  }, []);
+  const randomId = Math.random().toString(36).substring(7);
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-[#6a5acd] to-[#87ceeb]">
       <Link
