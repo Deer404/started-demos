@@ -1,4 +1,5 @@
-import { TransitionLink } from "nextjs-view-transition";
+import LinkTransition from "@/components/LinkTransition";
+import { TransitionLink } from "@/components/transition/TransitionLink";
 import { Card, CardContent, CardFooter, CardTitle } from "@/components/ui/card";
 import { Book } from "@/types/book";
 

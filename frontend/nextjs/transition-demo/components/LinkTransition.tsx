@@ -16,8 +16,11 @@ interface DocumentWithViewTransition extends Document, ViewTransition {}
 interface LinkTransitionProps extends LinkProps {
   children: React.ReactNode;
   href: string;
+
+  className?: string;
 }
 
+// @deprecated
 function LinkTransition({ children, href, ...props }: LinkTransitionProps) {
   const router = useRouter();
   const handleClick = (e: MouseEvent) => {

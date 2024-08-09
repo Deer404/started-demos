@@ -1,4 +1,3 @@
-import { TransitionLink } from "nextjs-view-transition";
 import {
   Card,
   CardDescription,
@@ -9,6 +8,8 @@ import {
 import { sleep } from "@/lib/utils";
 import { bookData } from "@/mock/book";
 import { Book } from "@/types/book";
+import LinkTransition from "@/components/LinkTransition";
+import { TransitionLink } from "@/components/transition/TransitionLink";
 
 async function getBooks(): Promise<Book[]> {
   await sleep(1000);
