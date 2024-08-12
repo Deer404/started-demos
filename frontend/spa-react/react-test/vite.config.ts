@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import Pages from "vite-plugin-pages";
+import UnoCSS from "unocss/vite";
 import { resolve } from "path";
 const currentDir = process.cwd();
 // https://vitejs.dev/config/

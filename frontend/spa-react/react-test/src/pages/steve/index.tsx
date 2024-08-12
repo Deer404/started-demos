@@ -2,7 +2,6 @@ import { useState, useCallback } from "react";
 import { Canvas } from "@react-three/fiber";
 import { Suspense } from "react";
 import { OrbitControls } from "@react-three/drei";
-import { SteveModel } from "@/components/models/steve";
 import { SteveRightHandModel } from "@/components/models/steve-right-hand";
 
 export default function McPage() {
