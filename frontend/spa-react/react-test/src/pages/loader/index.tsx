@@ -4,8 +4,8 @@ import { OrbitControls } from "@react-three/drei";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
-import * as THREE from "three";
 import { TextureLoader } from "three/src/loaders/TextureLoader";
+import { MeshStandardMaterial, NearestFilter } from "three";
 const Scene = () => {
   const fbx = useLoader(FBXLoader, "source/villager.fbx");
   const colorMap = useLoader(TextureLoader, "textures/villager_farmer.png");
@@ -13,14 +13,14 @@ const Scene = () => {
 
   useEffect(() => {
     [colorMap, opacityMap].forEach((texture) => {
-      texture.magFilter = THREE.NearestFilter;
-      texture.minFilter = THREE.NearestFilter;
+      texture.magFilter = NearestFilter;
+      texture.minFilter = NearestFilter;
       texture.generateMipmaps = false;
     });
     fbx.traverse((child) => {
       if (child.isMesh) {
         // 创建一个新的材质
-        const material = new THREE.MeshStandardMaterial({
+        const material = new MeshStandardMaterial({
           map: colorMap,
           transparent: true,
           alphaMap: opacityMap,
