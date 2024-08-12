@@ -7,6 +7,7 @@ const currentDir = process.cwd();
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
+    UnoCSS(),
     react(),
     Pages({
       dirs: [
