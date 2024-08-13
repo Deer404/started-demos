@@ -29,6 +29,9 @@ importers:
       '@unocss/reset':
         specifier: ^0.62.0
         version: 0.62.0
+      cannon:
+        specifier: ^0.6.2
+        version: 0.6.2
       react:
         specifier: ^18.3.1
         version: 18.3.1
@@ -1099,6 +1102,9 @@ packages:
 
   caniuse-lite@1.0.30001646:
     resolution: {integrity: sha512-dRg00gudiBDDTmUhClSdv3hqRfpbOnU28IpI1T6PBTLWa+kOj0681C8uML3PifYfREuBrVjDGhL3adYpBT6spw==}
+
+  cannon@0.6.2:
+    resolution: {integrity: sha512-n/7wWSXr8KOSvjad2x0fJHgpMepKjOKi+NdSnjfYyijoDBZnp4JQKgPcpv28jlXoWM+N9zVYU09J0A6Qxx+Y7w==}
 
   chalk@2.4.2:
     resolution: {integrity: sha512-Mti+f9lpJNcwF4tWV8/OrTTtF1gZi+f8FqlyAdouralcFWFQWF2+NgCHShjkCb+IFBLq9buZwE1xckQU4peSuQ==}
@@ -3124,6 +3130,8 @@ snapshots:
       three: 0.167.1
 
   caniuse-lite@1.0.30001646: {}
+
+  cannon@0.6.2: {}
 
   chalk@2.4.2:
     dependencies:

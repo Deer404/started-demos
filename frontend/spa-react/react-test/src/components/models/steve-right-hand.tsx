@@ -6,7 +6,7 @@ import { NearestFilter, MeshStandardMaterial } from "three";
 import { IObject3D } from "../../libs/constant";
 
 type SteveRightHandModelProps = {
-  onVillagerClick: () => void;
+  onVillagerClick?: () => void;
   position?: [number, number, number];
   rotation?: [number, number, number];
 };
@@ -50,7 +50,7 @@ export const SteveRightHandModel = ({
       if (event.button === 2) {
         // 右键点击
         event.stopPropagation();
-        onVillagerClick();
+        onVillagerClick?.();
       }
     },
     [onVillagerClick]

@@ -8,11 +8,13 @@ import { IObject3D } from "../../libs/constant";
 type VillagerModelProps = {
   onVillagerClick?: () => void;
   position?: [number, number, number] | undefined;
+  scale?: number;
 };
 
 export const VillagerModel = ({
   onVillagerClick,
   position = undefined,
+  scale = 0.02,
 }: VillagerModelProps) => {
   const fbx = useLoader(FBXLoader, "source/villager.fbx");
   const colorMap = useLoader(TextureLoader, "textures/villager_farmer.png");
@@ -54,7 +56,7 @@ export const VillagerModel = ({
       <primitive
         ref={villagerRef}
         object={fbx}
-        scale={0.1}
+        scale={scale}
         onClick={handleClick}
         onContextMenu={(e: MouseEvent) => {
           handleClick(e);

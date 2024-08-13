@@ -6,10 +6,16 @@ import { NearestFilter, MeshStandardMaterial } from "three";
 import { IObject3D } from "../../libs/constant";
 
 type SteveModelProps = {
-  onVillagerClick: () => void;
+  onVillagerClick?: () => void;
+  position?: [number, number, number];
+  rotation?: [number, number, number];
 };
 
-export const SteveModel = ({ onVillagerClick }: SteveModelProps) => {
+export const SteveModel = ({
+  onVillagerClick,
+  position,
+  rotation,
+}: SteveModelProps) => {
   const fbx = useLoader(FBXLoader, "source/steve.fbx");
   const colorMap = useLoader(TextureLoader, "textures/steve.png");
   const villagerRef = useRef();
@@ -38,7 +44,7 @@ export const SteveModel = ({ onVillagerClick }: SteveModelProps) => {
       if (event.button === 2) {
         // 右键点击
         event.stopPropagation();
-        onVillagerClick();
+        onVillagerClick?.();
       }
     },
     [onVillagerClick]
@@ -46,6 +52,8 @@ export const SteveModel = ({ onVillagerClick }: SteveModelProps) => {
 
   return (
     <primitive
+      position={position || [0, 0, 0]}
+      rotation={rotation || [0, 0, 0]}
       ref={villagerRef}
       object={fbx}
       scale={0.1}
