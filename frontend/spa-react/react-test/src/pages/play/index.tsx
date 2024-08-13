@@ -8,6 +8,7 @@ import { Euler, Group, Quaternion, Raycaster, Vector3 } from "three";
 import { VillageModel } from "@/components/models/village";
 import * as CANNON from "cannon";
 import { MapBounds, usePlayStore } from "@/store/playStore";
+import { BackgroundMusic } from "@/components/background-music";
 // 地图地面 y 轴位置 2.5
 const initVillagerPositon = [12, 2.5, 10] as const;
 const initPositon = [12, 2.5, 12] as const;
@@ -280,6 +281,7 @@ export default function McPage() {
 
   return (
     <div className="w-screen h-screen flex justify-center items-center relative">
+      <BackgroundMusic />
       <Canvas
         onContextMenu={(e) => e.preventDefault()}
         onClick={handleCanvasClick}
@@ -307,19 +309,7 @@ export default function McPage() {
         </Suspense>
       </Canvas>
       {showPanel && (
-        <div
-          style={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            backgroundColor: "white",
-            padding: "20px",
-            borderRadius: "10px",
-            boxShadow: "0 0 10px rgba(0,0,0,0.5)",
-            zIndex: 1000,
-          }}
-        >
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white p-5 rounded-lg shadow-lg z-50">
           <h2>神秘村民👁️‍🗨️</h2>
           <p>"或许你是第一个到达这个大陆的人"</p>
           <p>按下 Q 键可以关闭面板</p>

@@ -23,7 +23,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
-
+    "noEmitOnError": false,
     "baseUrl": "./",
     /* Paths */
     "paths": {
