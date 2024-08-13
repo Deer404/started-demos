@@ -4,6 +4,8 @@ import { OrbitControls } from "@react-three/drei";
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-expect-error
 import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader";
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
+// @ts-expect-error
 import { TextureLoader } from "three/src/loaders/TextureLoader";
 import { MeshStandardMaterial, NearestFilter } from "three";
 const Scene = () => {

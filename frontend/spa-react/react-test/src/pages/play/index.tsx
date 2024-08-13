@@ -1,9 +1,101 @@
-import { useState, useCallback } from "react";
-import { Canvas } from "@react-three/fiber";
+import { useState, useCallback, useRef, useEffect } from "react";
+import { Canvas, useThree, useFrame } from "@react-three/fiber";
 import { Suspense } from "react";
-import { OrbitControls } from "@react-three/drei";
+import { PerspectiveCamera, PointerLockControls } from "@react-three/drei";
 import { SteveRightHandModel } from "@/components/models/steve-right-hand";
 import { VillagerModel } from "@/components/models/villager";
+import { Euler, Group, Vector3 } from "three";
+
+function FirstPersonCamera({ position, moveSpeed = 0.1 }) {
+  const { camera } = useThree();
+  const moveDirection = useRef(new Vector3());
+  const [keys, setKeys] = useState({ w: false, a: false, s: false, d: false });
+
+  useEffect(() => {
+    const handleKeyDown = (e) =>
+      setKeys((keys) => ({ ...keys, [e.key.toLowerCase()]: true }));
+    const handleKeyUp = (e) =>
+      setKeys((keys) => ({ ...keys, [e.key.toLowerCase()]: false }));
+
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
+
+  useFrame(() => {
+    const frontVector = new Vector3(0, 0, -1);
+    const sideVector = new Vector3(-1, 0, 0);
+    const direction = new Vector3();
+
+    frontVector.applyQuaternion(camera.quaternion);
+    sideVector.applyQuaternion(camera.quaternion);
+
+    direction.set(0, 0, 0);
+    if (keys.w) direction.add(frontVector);
+    if (keys.s) direction.sub(frontVector);
+    if (keys.a) direction.add(sideVector);
+    if (keys.d) direction.sub(sideVector);
+
+    direction.normalize().multiplyScalar(moveSpeed);
+
+    camera.position.add(direction);
+  });
+
+  return (
+    <>
+      <PerspectiveCamera makeDefault position={position} />
+      <PointerLockControls />
+    </>
+  );
+}
+
+function RightHandModel() {
+  const { camera } = useThree();
+  const rightHandRef = useRef<Group>();
+  const initialCameraQuaternionRef = useRef<Quaternion>();
+
+  useEffect(() => {
+    initialCameraQuaternionRef.current = camera.quaternion.clone();
+  }, []);
+
+  useFrame(() => {
+    if (rightHandRef.current && initialCameraQuaternionRef.current) {
+      const rightHandPosition = new Vector3(0.15, -0.45, -0.55);
+      rightHandPosition.applyQuaternion(camera.quaternion);
+      rightHandPosition.add(camera.position);
+
+      rightHandRef.current.position.copy(rightHandPosition);
+
+      const inverseInitialCameraQuaternion = initialCameraQuaternionRef.current
+        .clone()
+        .invert();
+      const deltaQuaternion = camera.quaternion
+        .clone()
+        .multiply(inverseInitialCameraQuaternion);
+
+      const rightHandRotation = new Euler().setFromQuaternion(
+        deltaQuaternion,
+        "YXZ"
+      );
+      rightHandRotation.x += Math.PI / 2;
+      rightHandRotation.z += Math.PI / 0.5;
+
+      rightHandRef.current.rotation.copy(rightHandRotation);
+    }
+  });
+
+  return (
+    <group ref={rightHandRef} scale={[0.5, 0.5, 0.5]}>
+      <SteveRightHandModel
+        onVillagerClick={() => console.log("Hand clicked")}
+      />
+    </group>
+  );
+}
 
 export default function McPage() {
   const [showPanel, setShowPanel] = useState(false);
@@ -12,8 +104,6 @@ export default function McPage() {
     console.log("handleVillagerClick called");
     setShowPanel((prev) => !prev);
   }, []);
-
-  console.log("showPanel:", showPanel);
 
   const handleCanvasClick = useCallback((event) => {
     if (event.button === 2) {
@@ -38,13 +128,11 @@ export default function McPage() {
         onClick={handleCanvasClick}
       >
         <Suspense fallback={null}>
-          {/* 村民模型放在原点 */}
+          <FirstPersonCamera position={[0, 0, 5]} />
           <VillagerModel onVillagerClick={handleVillagerClick} />
-          {/* 右手模型 */}
-          <SteveRightHandModel onVillagerClick={handleVillagerClick} />
+          <RightHandModel />
           <ambientLight intensity={0.8} />
           <directionalLight position={[5, 5, 5]} intensity={0.5} />
-          <OrbitControls target={[0, 0, 0]} /> {/* 将相机目标设置为村民模型 */}
         </Suspense>
       </Canvas>
       {showPanel && (

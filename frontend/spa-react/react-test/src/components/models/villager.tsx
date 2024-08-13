@@ -5,11 +5,15 @@ import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
 import { NearestFilter, MeshStandardMaterial } from "three";
 import { IObject3D } from "../../libs/constant";
 
+type VillagerModelProps = {
+  onVillagerClick?: () => void;
+  position?: [number, number, number] | undefined;
+};
+
 export const VillagerModel = ({
   onVillagerClick,
-}: {
-  onVillagerClick: () => void;
-}) => {
+  position = undefined,
+}: VillagerModelProps) => {
   const fbx = useLoader(FBXLoader, "source/villager.fbx");
   const colorMap = useLoader(TextureLoader, "textures/villager_farmer.png");
   const opacityMap = useLoader(TextureLoader, "textures/villager_opacity.png");
@@ -23,7 +27,6 @@ export const VillagerModel = ({
     });
     fbx.traverse((child) => {
       if ((child as IObject3D).isMesh) {
-        console.log("child:", child);
         const material = new MeshStandardMaterial({
           map: colorMap,
           transparent: true,
@@ -40,21 +43,23 @@ export const VillagerModel = ({
       if (event.button === 2) {
         // 右键点击
         event.stopPropagation();
-        onVillagerClick();
+        onVillagerClick?.();
       }
     },
     [onVillagerClick]
   );
 
   return (
-    <primitive
-      ref={villagerRef}
-      object={fbx}
-      scale={0.1}
-      onClick={handleClick}
-      onContextMenu={(e: MouseEvent) => {
-        handleClick(e);
-      }}
-    />
+    <group position={position}>
+      <primitive
+        ref={villagerRef}
+        object={fbx}
+        scale={0.1}
+        onClick={handleClick}
+        onContextMenu={(e: MouseEvent) => {
+          handleClick(e);
+        }}
+      />
+    </group>
   );
 };

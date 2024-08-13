@@ -5,11 +5,11 @@ import { FBXLoader } from "three/examples/jsm/loaders/FBXLoader.js";
 import { NearestFilter, MeshStandardMaterial } from "three";
 import { IObject3D } from "../../libs/constant";
 
-export const SteveModel = ({
-  onVillagerClick,
-}: {
+type SteveModelProps = {
   onVillagerClick: () => void;
-}) => {
+};
+
+export const SteveModel = ({ onVillagerClick }: SteveModelProps) => {
   const fbx = useLoader(FBXLoader, "source/steve.fbx");
   const colorMap = useLoader(TextureLoader, "textures/steve.png");
   const villagerRef = useRef();
