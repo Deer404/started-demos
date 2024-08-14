@@ -23,7 +23,6 @@ interface FirstPersonCameraProps {
 function FirstPersonCamera({
   position,
   moveSpeed = 3,
-  allowContinuousJump = false,
   minHeight = 2.5,
   mapBounds,
 }: FirstPersonCameraProps) {
@@ -35,8 +34,8 @@ function FirstPersonCamera({
     d: false,
     " ": false,
   });
-  const [_, setJump] = useState(false);
-  const [canJump, setCanJump] = useState(true);
+  const [isJumping, setIsJumping] = useState(false);
+  const [canJump, setCanJump] = useState(false);
   const [world] = useState(() => new CANNON.World());
   const [body] = useState(
     () =>
@@ -57,12 +56,9 @@ function FirstPersonCamera({
     const handleKeyDown = (e: KeyboardEvent) => {
       setKeys((keys) => ({ ...keys, [e.key.toLowerCase()]: true }));
       if (e.key === " " && canJump) {
-        // 直接访问 canJump 的值
-        setJump(true);
+        setIsJumping(true);
+        setCanJump(false);
         body.velocity.y = 5; // 设置跳跃初速度
-        if (!allowContinuousJump) {
-          setCanJump(false);
-        }
       }
     };
     const handleKeyUp = (e: KeyboardEvent) => {
@@ -81,12 +77,19 @@ function FirstPersonCamera({
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
+    camera.position.copy(body.position as any);
+
+    // 检查初始位置是否在地面上
+    const groundY = 2.5;
+    const isOnGround = Math.abs(position[1] - groundY) < 0.1;
+    setCanJump(isOnGround);
+
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keyup", handleKeyUp);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [allowContinuousJump]);
+  }, [body, camera.position, canJump, position, world]);
 
   useFrame((_, delta) => {
     const currentTime = performance.now();
@@ -113,7 +116,7 @@ function FirstPersonCamera({
     direction.normalize().multiplyScalar(moveSpeed);
 
     // 碰撞检测
-    raycaster.current.set(camera.position, direction);
+    raycaster.current.set(body.position as any, direction);
     const intersects = raycaster.current.intersectObjects(scene.children, true);
     if (intersects.length > 0 && intersects[0].distance < 0.5) {
       // 如果相机前方 0.5 个单位内有障碍物,则不移动
@@ -123,22 +126,29 @@ function FirstPersonCamera({
     body.velocity.x = direction.x;
     body.velocity.z = direction.z;
 
-    camera.position.copy(body.position as any);
-
     // 检查相机下方是否有表面
-    raycaster.current.set(camera.position, new Vector3(0, -1, 0));
+    raycaster.current.set(body.position as any, new Vector3(0, -1, 0));
     const intersectsBelow = raycaster.current.intersectObjects(
       scene.children,
       true
     );
-    if (intersectsBelow.length > 0 && intersectsBelow[0].distance < 0.5) {
-      // 如果相机下方 0.5 个单位内有表面,将相机位置设置为表面上方 0.5 个单位处
-      camera.position.y = intersectsBelow[0].point.y + 0.5;
-      body.position.copy(camera.position as any);
+    const isOnGround =
+      intersectsBelow.length > 0 && intersectsBelow[0].distance < 0.6;
+
+    if (isOnGround) {
+      // 如果相机下方 0.6 个单位内有表面,将相机位置设置为表面上方 0.5 个单位处
+      body.position.y = intersectsBelow[0].point.y + 0.5;
       body.velocity.y = 0;
-      setJump(false);
-      setCanJump(true); // 将 setCanJump 调用移到 setJump 之后
+
+      if (isJumping) {
+        setIsJumping(false);
+      }
     }
+
+    setCanJump(isOnGround); // 根据是否在地面上设置 canJump
+
+    // 更新相机位置
+    camera.position.copy(body.position as any);
 
     // 限制相机的最低高度
     if (camera.position.y < minHeight) {
@@ -161,7 +171,16 @@ function FirstPersonCamera({
       );
     }
     body.position.copy(camera.position as any);
+
+    console.log("FirstPersonCamera render", camera.position.y, canJump);
   });
+
+  useEffect(() => {
+    // 设置相机的初始位置
+    body.position.set(...position);
+  }, []);
+
+  console.log("FirstPersonCamera render", camera.position.y, canJump);
 
   return (
     <>
