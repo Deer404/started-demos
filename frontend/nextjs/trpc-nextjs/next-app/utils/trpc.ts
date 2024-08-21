@@ -1,7 +1,7 @@
 import { httpBatchLink } from "@trpc/client";
 import { createTRPCNext } from "@trpc/next";
-import { appRouter, type AppRouter } from "@server/routers/_app";
-
+import { type AppRouter } from "@server/routers/_app";
+import { ssrPrepass } from "@trpc/next/ssrPrepass";
 function getBaseUrl() {
   if (typeof window !== "undefined")
     // browser should use relative path
@@ -23,7 +23,8 @@ export const trpc = createTRPCNext<AppRouter>({
   /**
    * @link https://trpc.io/docs/v11/ssr
    **/
-  ssr: false,
+  ssr: true,
+  ssrPrepass,
   config(opts) {
     return {
       links: [
