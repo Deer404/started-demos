@@ -1,29 +1,25 @@
-import { create } from "zustand";
+let nextId = 0;
+let todos = [{ id: nextId++, text: "Todo #1" }];
+let listeners: Array<() => void> = [];
 
-type TodoState = {
-  todo: string[];
-  addTodo: (todo: string) => void;
-  getTodo: () => Promise<string[]>;
+export const todosStore = {
+  addTodo() {
+    todos = [...todos, { id: nextId++, text: "Todo #" + nextId }];
+    emitChange();
+  },
+  subscribe(listener) {
+    listeners = [...listeners, listener];
+    return () => {
+      listeners = listeners.filter((l) => l !== listener);
+    };
+  },
+  getSnapshot() {
+    return todos;
+  },
 };
 
-export async function sleep(ms: number) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+function emitChange() {
+  for (const listener of listeners) {
+    listener();
+  }
 }
-
-async function fetchTodo() {
-  await sleep(1000);
-  return ["todo1", "todo2", "todo3"];
-}
-
-// function useXX() {
-//   return useQuery({
-//     queryKey: ["todo"],
-//     queryFn: () => fetchTodo(),
-//   });
-// }
-
-export const useTodoStore = create<TodoState>((set) => ({
-  todo: [],
-  addTodo: (todo) => set((state) => ({ todo: [...state.todo, todo] })),
-  getTodo: async () => await fetchTodo(),
-}));
