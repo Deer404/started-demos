@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { procedure, router } from "../trpc";
+import { createCallerFactory, procedure, router } from "../trpc";
 import { userRouter } from "./user";
 
 export const appRouter = router({
@@ -20,3 +20,4 @@ export const appRouter = router({
 
 // export type definition of API
 export type AppRouter = typeof appRouter;
+export const createCaller = createCallerFactory(appRouter);

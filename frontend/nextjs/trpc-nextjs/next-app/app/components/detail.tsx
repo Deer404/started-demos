@@ -1,11 +1,11 @@
 "use client";
 
-import { trpc } from "@/utils/trpc";
+import { clientApi } from "@/utils/trpc-client";
 
-export default trpc.withTRPC(function Detail() {
-  const { data, isLoading } = trpc.user.getUser.useQuery("");
+function Detail() {
+  const { data, isLoading } = clientApi.hello.useQuery({ text: "world" });
 
   if (isLoading) return <div>加载中...</div>;
 
   return <div>Detail: {JSON.stringify(data)}</div>;
-});
+}

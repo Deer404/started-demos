@@ -1,7 +1,7 @@
-import { helpers } from "@/utils/trpc-server";
 import Detail from "@/app/components/detail";
+import { api } from "@/utils/trpc-server";
 export default async function Home() {
-  const data = await helpers.hello.fetch({ text: "world" });
+  const data = await api.hello({ text: "world" });
   return (
     <div>
       <span>{data.greeting}</span>
