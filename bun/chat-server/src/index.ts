@@ -61,7 +61,7 @@ app.use("/*", async (c, next) => {
   const corsMiddlewareHandler = cors({
     origin: "*",
   });
-  return corsMiddlewareHandler(c as any, next);
+  return corsMiddlewareHandler(c, next);
 });
 
 const getMessageRoute = createRoute({
