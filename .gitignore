@@ -1,0 +1,55 @@
+# macOS-specific files
+.DS_Store
+# Rust
+**/target/
+**/*.rs.bk
+**/*.rs.bk~
+**/Cargo.lock
+**/Cargo.toml
+
+# Flutter
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.packages
+**/.pub-cache
+**/.pub/
+**/build/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/Flutter.xcframework
+**/ios/Pods/
+**/android/.gradle/
+**/android/app/build/
+**/android/app/intermediates/
+**/android/app/outputs/
+**/android/app/src/debug/
+**/android/app/src/profile/
+**/android/.idea/
+**/android/.gradle/
+**/android/local.properties
+**/android/gradle.properties
+**/android/gradle-wrapper.properties
+**/android/app/google-services.json
+
+# Node.js / npm
+**/node_modules/
+**/npm-debug.log
+**/yarn-error.log
+**/package-lock.json
+**/yarn.lock
+**/dist/
+**/build/
+**/coverage/
+**/*.tgz
+**/.env
+**/.DS_Store
+
+# Visual Studio Code
+**/.vscode/
+**/.idea/
+
+# Other
+**/*.log
+**/*.tmp
+**/*.bak
+**/*.swp

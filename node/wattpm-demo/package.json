@@ -1,0 +1,16 @@
+{
+  "name": "wattpm-demo",
+  "private": true,
+  "scripts": {
+    "dev": "wattpm dev",
+    "build": "wattpm build",
+    "start": "wattpm start"
+  },
+  "dependencies": {
+    "@platformatic/composer": "^2.5.5",
+    "wattpm": "^2.5.5"
+  },
+  "workspaces": [
+    "web/*"
+  ]
+}
