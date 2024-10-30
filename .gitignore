@@ -1,22 +1,55 @@
-# macOS-specific files
+# OS generated files
 .DS_Store
+**/Thumbs.db
+**/ehthumbs.db
+**/Desktop.ini
+**/$RECYCLE.BIN/
+**/*.lnk
+
+# IDE & Editors
+**/.vscode/
+**/.idea/
+**/.fleet/
+**/.vscode-test/
+**/.history/
+**/*.sublime-*
+**/.project
+**/.settings
+**/.classpath
+
+# Build and cache
+**/dist/
+**/dist-ssr/
+**/build/
+**/.next/
+**/.nuxt/
+**/.svelte-kit/
+**/.output/
+**/.cache/
+**/.temp/
+
 # Rust
 **/target/
 **/*.rs.bk
 **/*.rs.bk~
+**/*.pdb
+**/*.rs.old
 **/Cargo.lock
 **/Cargo.toml
 
-# Flutter
+# Flutter/Dart
+**/.dart_tool/
 **/.flutter-plugins
 **/.flutter-plugins-dependencies
 **/.packages
-**/.pub-cache
+**/.pub-cache/
 **/.pub/
 **/build/
 **/ios/Flutter/Flutter.framework
 **/ios/Flutter/Flutter.podspec
 **/ios/Flutter/Flutter.xcframework
+**/ios/Flutter/ephemeral/
+**/macos/Flutter/ephemeral/
 **/ios/Pods/
 **/android/.gradle/
 **/android/app/build/
@@ -25,30 +58,41 @@
 **/android/app/src/debug/
 **/android/app/src/profile/
 **/android/.idea/
-**/android/.gradle/
 **/android/local.properties
 **/android/gradle.properties
 **/android/gradle-wrapper.properties
 **/android/app/google-services.json
+**/*.iml
+**/*.iws
 
 # Node.js / npm
 **/node_modules/
+**/.pnpm-debug.log*
+**/.npm/
 **/npm-debug.log
 **/yarn-error.log
 **/package-lock.json
 **/yarn.lock
-**/dist/
-**/build/
-**/coverage/
+**/.eslintcache
+**/.stylelintcache
+**/tsconfig.tsbuildinfo
 **/*.tgz
+
+# Testing
+**/coverage/
+**/.nyc_output/
+**/cypress/videos/
+**/cypress/screenshots/
+**/.pytest_cache/
+
+# Local configs
+**/*.local
+**/*.local.*
 **/.env
-**/.DS_Store
+**/.env.*
+!.env.example
 
-# Visual Studio Code
-**/.vscode/
-**/.idea/
-
-# Other
+# Logs and temps
 **/*.log
 **/*.tmp
 **/*.bak
