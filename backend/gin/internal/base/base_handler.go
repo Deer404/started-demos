@@ -22,6 +22,7 @@ func (bh *BaseHandler[T]) RegisterRoutes(r *gin.RouterGroup, path string) {
 		group.GET("/", bh.List)
 		group.GET("/:id", bh.Get)
 		group.PUT("/:id", bh.Update)
+		group.PATCH("/:id", bh.Patch)
 		group.DELETE("/:id", bh.Delete)
 	}
 }
@@ -99,6 +100,28 @@ func (bh *BaseHandler[T]) Delete(c *gin.Context) {
 	}
 
 	if err := bh.store.Delete(uint(id)); err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+}
+
+func (bh *BaseHandler[T]) Patch(c *gin.Context) {
+	idStr := c.Param("id")
+	id, err := strconv.ParseUint(idStr, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
+		return
+	}
+
+	var updates map[string]interface{}
+	if err := c.ShouldBindJSON(&updates); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if err := bh.store.Patch(uint(id), updates); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}

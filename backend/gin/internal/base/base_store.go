@@ -90,10 +90,29 @@ func (s *GormStore[T]) Delete(id uint) error {
 	return nil
 }
 
+func (s *GormStore[T]) Patch(id uint, updates map[string]interface{}) error {
+	if id == 0 {
+		return ErrInvalidID
+	}
+	if updates == nil {
+		return errors.New("updates cannot be nil")
+	}
+
+	result := s.db.Table(s.tableName).Where("id = ?", id).Updates(updates)
+	if result.Error != nil {
+		return result.Error
+	}
+	if result.RowsAffected == 0 {
+		return ErrRecordNotFound
+	}
+	return nil
+}
+
 type BaseStore[T BaseModel] interface {
 	Create(item *T) error
 	Get(id uint) (*T, error)
 	List() ([]*T, error)
 	Update(id uint, item *T) error
 	Delete(id uint) error
+	Patch(id uint, updates map[string]interface{}) error
 }
