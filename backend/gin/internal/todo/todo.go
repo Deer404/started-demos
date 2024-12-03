@@ -1,6 +1,9 @@
 package todo
 
-import "time"
+import (
+	"Demo/internal/base"
+	"time"
+)
 
 // Todo 表示一个待办事项
 type Todo struct {
@@ -13,9 +16,9 @@ type Todo struct {
 
 // Store 定义数据存储接口
 type Store interface {
-	Create(todo *Todo) error
-	Get(id uint) (*Todo, error)
-	List() ([]*Todo, error)
-	Update(todo *Todo) error
-	Delete(id uint) error
+	base.BaseStore[*Todo]
+}
+
+func (t Todo) GetID() uint {
+	return t.ID
 }
