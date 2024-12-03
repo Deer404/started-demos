@@ -3,11 +3,13 @@ package todo
 import (
 	"Demo/internal/base"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 // Todo 表示一个待办事项
 type Todo struct {
-	ID        uint      `json:"id" gorm:"primarykey"`
+	ID        uuid.UUID `json:"id" gorm:"type:uuid;primary_key;default:gen_random_uuid()"`
 	Title     string    `json:"title"`
 	Completed bool      `json:"completed"`
 	CreatedAt time.Time `json:"created_at"`
@@ -19,6 +21,6 @@ type Store interface {
 	base.BaseStore[*Todo]
 }
 
-func (t Todo) GetID() uint {
+func (t Todo) GetID() uuid.UUID {
 	return t.ID
 }

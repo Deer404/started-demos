@@ -2,7 +2,9 @@ package base
 
 import (
 	"errors"
+	"log"
 
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
@@ -11,16 +13,25 @@ var (
 	ErrInvalidID      = errors.New("invalid id")
 )
 
-type BaseModel interface {
-	GetID() uint
+type BaseStore[T BaseModel] interface {
+	Create(item *T) error
+	Get(id uuid.UUID) (*T, error)
+	List() ([]*T, error)
+	Update(id uuid.UUID, item *T) error
+	Delete(id uuid.UUID) error
+	Patch(id uuid.UUID, updates map[string]interface{}) error
 }
 
-type GormStore[T BaseModel] struct {
+type BaseModel interface {
+	GetID() uuid.UUID
+}
+
+type GormStore[T any] struct {
 	db        *gorm.DB
 	tableName string
 }
 
-func NewGormStore[T BaseModel](db *gorm.DB, tableName string) *GormStore[T] {
+func NewGormStore[T any](db *gorm.DB, tableName string) *GormStore[T] {
 	return &GormStore[T]{
 		db:        db,
 		tableName: tableName,
@@ -34,8 +45,8 @@ func (s *GormStore[T]) Create(item *T) error {
 	return s.db.Table(s.tableName).Create(item).Error
 }
 
-func (s *GormStore[T]) Get(id uint) (*T, error) {
-	if id == 0 {
+func (s *GormStore[T]) Get(id uuid.UUID) (*T, error) {
+	if id == uuid.Nil {
 		return nil, ErrInvalidID
 	}
 
@@ -50,15 +61,22 @@ func (s *GormStore[T]) Get(id uint) (*T, error) {
 }
 
 func (s *GormStore[T]) List() ([]*T, error) {
-	var items []*T
+	var items []T
 	if err := s.db.Table(s.tableName).Find(&items).Error; err != nil {
+		log.Printf("List error: %v", err)
 		return nil, err
 	}
-	return items, nil
+
+	result := make([]*T, len(items))
+	for i := range items {
+		result[i] = &items[i]
+	}
+
+	return result, nil
 }
 
-func (s *GormStore[T]) Update(id uint, item *T) error {
-	if id == 0 {
+func (s *GormStore[T]) Update(id uuid.UUID, item *T) error {
+	if id == uuid.Nil {
 		return ErrInvalidID
 	}
 	if item == nil {
@@ -75,12 +93,12 @@ func (s *GormStore[T]) Update(id uint, item *T) error {
 	return nil
 }
 
-func (s *GormStore[T]) Delete(id uint) error {
-	if id == 0 {
+func (s *GormStore[T]) Delete(id uuid.UUID) error {
+	if id == uuid.Nil {
 		return ErrInvalidID
 	}
 
-	result := s.db.Table(s.tableName).Delete(&struct{ ID uint }{id})
+	result := s.db.Table(s.tableName).Delete(&struct{ ID uuid.UUID }{id})
 	if result.Error != nil {
 		return result.Error
 	}
@@ -90,8 +108,8 @@ func (s *GormStore[T]) Delete(id uint) error {
 	return nil
 }
 
-func (s *GormStore[T]) Patch(id uint, updates map[string]interface{}) error {
-	if id == 0 {
+func (s *GormStore[T]) Patch(id uuid.UUID, updates map[string]interface{}) error {
+	if id == uuid.Nil {
 		return ErrInvalidID
 	}
 	if updates == nil {
@@ -106,13 +124,4 @@ func (s *GormStore[T]) Patch(id uint, updates map[string]interface{}) error {
 		return ErrRecordNotFound
 	}
 	return nil
-}
-
-type BaseStore[T BaseModel] interface {
-	Create(item *T) error
-	Get(id uint) (*T, error)
-	List() ([]*T, error)
-	Update(id uint, item *T) error
-	Delete(id uint) error
-	Patch(id uint, updates map[string]interface{}) error
 }

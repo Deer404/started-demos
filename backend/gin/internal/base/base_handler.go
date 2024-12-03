@@ -2,9 +2,9 @@ package base
 
 import (
 	"net/http"
-	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
 )
 
 type BaseHandler[T BaseModel] struct {
@@ -44,13 +44,13 @@ func (bh *BaseHandler[T]) Create(c *gin.Context) {
 
 func (bh *BaseHandler[T]) Get(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
-	item, err := bh.store.Get(uint(id))
+	item, err := bh.store.Get(id)
 	if err != nil {
 		c.JSON(http.StatusNotFound, gin.H{"error": "item not found"})
 		return
@@ -71,7 +71,7 @@ func (bh *BaseHandler[T]) List(c *gin.Context) {
 
 func (bh *BaseHandler[T]) Update(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 		return
@@ -83,7 +83,7 @@ func (bh *BaseHandler[T]) Update(c *gin.Context) {
 		return
 	}
 
-	if err := bh.store.Update(uint(id), &item); err != nil {
+	if err := bh.store.Update(id, &item); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -93,13 +93,13 @@ func (bh *BaseHandler[T]) Update(c *gin.Context) {
 
 func (bh *BaseHandler[T]) Delete(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 		return
 	}
 
-	if err := bh.store.Delete(uint(id)); err != nil {
+	if err := bh.store.Delete(id); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
@@ -109,7 +109,7 @@ func (bh *BaseHandler[T]) Delete(c *gin.Context) {
 
 func (bh *BaseHandler[T]) Patch(c *gin.Context) {
 	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 32)
+	id, err := uuid.Parse(idStr)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid id"})
 		return
@@ -121,7 +121,7 @@ func (bh *BaseHandler[T]) Patch(c *gin.Context) {
 		return
 	}
 
-	if err := bh.store.Patch(uint(id), updates); err != nil {
+	if err := bh.store.Patch(id, updates); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
