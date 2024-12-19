@@ -10,7 +10,7 @@ type Handler struct {
 	*base.BaseHandler[*Todo]
 }
 
-func NewHandler(store Store) *Handler {
+func NewHandler(store TodoStore) *Handler {
 	return &Handler{
 		BaseHandler: base.NewBaseHandler[*Todo](store),
 	}

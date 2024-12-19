@@ -10,7 +10,7 @@ type store struct {
 	*base.GormStore[*Todo]
 }
 
-func NewStore(db *gorm.DB) Store {
+func NewStore(db *gorm.DB) TodoStore {
 	return &store{
 		GormStore: base.NewGormStore[*Todo](db, "todos"),
 	}

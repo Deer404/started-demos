@@ -16,8 +16,8 @@ type Todo struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
-// Store 定义数据存储接口
-type Store interface {
+// TodoStore 定义数据存储接口
+type TodoStore interface {
 	base.BaseStore[*Todo]
 }
 
