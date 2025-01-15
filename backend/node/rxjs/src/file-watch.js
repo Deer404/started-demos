@@ -1,4 +1,4 @@
-import { Observable } from "rxjs";
+import { Observable, share } from "rxjs";
 import { watch } from "fs"
 import path from "path";
 
@@ -18,7 +18,7 @@ function watchFile(path) {
         })
 
         return () => watcher.close()
-    });
+    }).pipe(share());
 }
 
 watchFile(exampleFilePath).subscribe({

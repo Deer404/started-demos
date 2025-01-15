@@ -10,6 +10,9 @@ import { BehaviorSubject } from 'rxjs';
  * }}
  */
 function createSignal(initialState) {
+
+    // 使用 BehaviorSubject 来保存信号的当前值
+    // BehaviorSubject 是 Subject的 变体，需要一个初始值，当有订阅时，会立即发送当前值
     const state$ = new BehaviorSubject(initialState);
 
     return {
@@ -51,3 +54,5 @@ count.value = 1;
 
 // 读取当前值
 console.log(count.value); // 1
+
+
