@@ -57,7 +57,25 @@ class _ChatScreenState extends State<ChatScreen> {
   // 当前高亮的消息ID
   int? _highlightedMessageIndex;
 
-  final List<ChatMessage> _messages = _generateMockMessages();
+  // 分页加载相关参数
+  final int _pageSize = 20; // 每页加载的消息数量
+  int _currentPage = 1; // 当前已加载的页数
+  bool _isLoadingMore = false; // 是否正在加载更多
+  bool _hasMoreMessages = true; // 是否还有更多消息可加载
+
+  // 搜索分页相关参数
+  final int _searchPageSize = 20; // 每页加载的搜索结果数量
+  int _currentSearchPage = 1; // 当前已加载的搜索页数
+  bool _isLoadingMoreSearch = false; // 是否正在加载更多搜索结果
+  bool _hasMoreSearchResults = true; // 是否还有更多搜索结果可加载
+  List<int> _allSearchResults = []; // 所有匹配搜索关键词的消息索引
+
+  // 全部消息和已加载的消息
+  final List<ChatMessage> _allMessages = _generateMockMessages();
+  late List<ChatMessage> _displayMessages; // 当前显示的消息
+
+  // 当前已加载的搜索结果
+  late List<ChatMessage> _displaySearchMessages;
 
   // 生成模拟聊天数据
   static List<ChatMessage> _generateMockMessages() {
@@ -861,35 +879,82 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+
+    // 初始化显示消息列表，只加载最新的一页
+    _loadInitialMessages();
+
+    // 添加滚动监听器
+    _scrollController.addListener(_scrollListener);
+    _searchScrollController.addListener(_searchScrollListener);
+
     // 模拟每隔一段时间收到新消息
     Future.delayed(const Duration(seconds: 15), () {
       _simulateNewMessage();
     });
   }
 
-  // 模拟接收新消息
-  void _simulateNewMessage() {
-    if (!mounted) return;
+  // 加载初始消息
+  void _loadInitialMessages() {
+    final totalMessages = _allMessages.length;
+    final endIndex = totalMessages;
+    final startIndex =
+        totalMessages > _pageSize ? totalMessages - _pageSize : 0;
 
     setState(() {
-      _messages.add(
-        ChatMessage(
-          text: "这是一条新收到的消息，测试搜索时的体验",
-          isSentByMe: false,
-          time: DateTime.now(),
-        ),
-      );
+      _displayMessages = _allMessages.sublist(startIndex, endIndex);
+      _hasMoreMessages = startIndex > 0;
+      _currentPage = 1;
+    });
+  }
+
+  // 滚动监听器，用于检测何时需要加载更多历史消息
+  void _scrollListener() {
+    if (_scrollController.position.pixels >
+            _scrollController.position.maxScrollExtent - 500 &&
+        !_isLoadingMore &&
+        _hasMoreMessages) {
+      _loadMoreMessages();
+    }
+  }
+
+  // 搜索模式下的滚动监听器
+  void _searchScrollListener() {
+    if (_searchScrollController.position.pixels >
+            _searchScrollController.position.maxScrollExtent - 500 &&
+        !_isLoadingMoreSearch &&
+        _hasMoreSearchResults) {
+      _loadMoreSearchResults();
+    }
+  }
+
+  // 加载更多历史消息
+  void _loadMoreMessages() {
+    if (!_hasMoreMessages || _isLoadingMore) return;
+
+    setState(() {
+      _isLoadingMore = true;
     });
 
-    // 如果不在搜索模式，或者没有搜索结果，则滚动到底部
-    if (!_isSearching || _searchResults.isEmpty) {
-      _scrollToBottom();
-    }
-    // 搜索模式下不需要做任何滚动操作，保持当前位置
+    // 模拟网络延迟
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (!mounted) return;
 
-    // 继续模拟接收消息
-    Future.delayed(const Duration(seconds: 20), () {
-      _simulateNewMessage();
+      final totalMessages = _allMessages.length;
+      final currentCount = _displayMessages.length;
+      final endIndex = totalMessages - currentCount;
+      final startIndex = endIndex > _pageSize ? endIndex - _pageSize : 0;
+
+      setState(() {
+        if (startIndex < endIndex) {
+          // 插入到列表开头（旧消息）
+          _displayMessages.insertAll(
+              0, _allMessages.sublist(startIndex, endIndex));
+          _currentPage++;
+        }
+
+        _hasMoreMessages = startIndex > 0;
+        _isLoadingMore = false;
+      });
     });
   }
 
@@ -908,50 +973,149 @@ class _ChatScreenState extends State<ChatScreen> {
     });
   }
 
+  // 模拟接收新消息
+  void _simulateNewMessage() {
+    if (!mounted) return;
+
+    final newMessage = ChatMessage(
+      text: "这是一条新收到的消息，测试搜索时的体验",
+      isSentByMe: false,
+      time: DateTime.now(),
+    );
+
+    setState(() {
+      _allMessages.add(newMessage);
+      _displayMessages.add(newMessage);
+
+      // 如果在搜索模式下，检查新消息是否匹配搜索条件
+      if (_isSearching && _searchController.text.isNotEmpty) {
+        if (newMessage.text
+            .toLowerCase()
+            .contains(_searchController.text.toLowerCase())) {
+          _allSearchResults.add(_allMessages.length - 1);
+
+          // 如果当前页面已经显示了所有搜索结果，则添加这个新的匹配消息
+          if (_hasMoreSearchResults == false) {
+            _displaySearchMessages.add(newMessage);
+            _searchResults.add(_allMessages.length - 1);
+          }
+        }
+      }
+    });
+
+    // 如果不在搜索模式，或者没有搜索结果，则滚动到底部
+    if (!_isSearching || _searchResults.isEmpty) {
+      _shouldScrollToBottom = true;
+      _scrollToBottom();
+    }
+    // 搜索模式下不需要做任何滚动操作，保持当前位置
+
+    // 继续模拟接收消息
+    Future.delayed(const Duration(seconds: 20), () {
+      _simulateNewMessage();
+    });
+  }
+
   @override
   void dispose() {
     _textController.dispose();
     _searchController.dispose();
+    _scrollController.removeListener(_scrollListener);
+    _searchScrollController.removeListener(_searchScrollListener);
     _scrollController.dispose();
     _searchScrollController.dispose();
     super.dispose();
   }
 
-  // 搜索聊天记录
+  // 搜索聊天记录 (分页实现)
   void _searchMessages(String keyword) {
     if (keyword.isEmpty) {
       setState(() {
+        _allSearchResults = [];
         _searchResults = [];
         _currentSearchIndex = -1;
         _shouldScrollToBottom = true;
         _highlightedMessageIndex = null;
-        _searchMessagesSnapshot = [];
+        _displaySearchMessages = [];
+        _hasMoreSearchResults = false;
+        _currentSearchPage = 1;
       });
       return;
     }
 
-    // 创建当前消息列表的快照
-    final snapshot = List<ChatMessage>.from(_messages);
-
+    // 在全部消息中搜索，但只显示第一页结果
     final List<int> results = [];
-    for (int i = 0; i < snapshot.length; i++) {
-      if (snapshot[i].text.toLowerCase().contains(keyword.toLowerCase())) {
+    for (int i = 0; i < _allMessages.length; i++) {
+      if (_allMessages[i].text.toLowerCase().contains(keyword.toLowerCase())) {
         results.add(i);
       }
     }
 
-    setState(() {
-      _searchMessagesSnapshot = snapshot;
-      _searchResults = results;
-      _currentSearchIndex = results.isNotEmpty ? 0 : -1;
-      // 当有搜索结果时，禁用自动滚动到底部
-      _shouldScrollToBottom = false;
+    // 排序结果（从新到旧）
+    results.sort((a, b) => b.compareTo(a));
 
-      if (results.isNotEmpty) {
-        _highlightedMessageIndex = results[0];
-        _scrollToSearchMessage(results[0]);
+    final int endIndex =
+        results.length > _searchPageSize ? _searchPageSize : results.length;
+    final displayResults = endIndex > 0 ? results.sublist(0, endIndex) : [];
+
+    // 创建要显示的搜索消息列表
+    final List<ChatMessage> displaySearchMessages = [];
+    for (final index in displayResults) {
+      displaySearchMessages.add(_allMessages[index]);
+    }
+
+    setState(() {
+      _allSearchResults = results;
+      _searchResults = List<int>.from(displayResults);
+      _displaySearchMessages = displaySearchMessages;
+      _currentSearchIndex = displayResults.isNotEmpty ? 0 : -1;
+      _shouldScrollToBottom = false;
+      _hasMoreSearchResults = results.length > _searchPageSize;
+      _currentSearchPage = 1;
+
+      if (displayResults.isNotEmpty) {
+        _highlightedMessageIndex = 0; // 高亮第一个结果
+        // 不需要立即滚动，因为列表会自动构建并显示第一页
       } else {
         _highlightedMessageIndex = null;
+      }
+    });
+  }
+
+  // 加载更多搜索结果
+  void _loadMoreSearchResults() {
+    if (!_hasMoreSearchResults || _isLoadingMoreSearch) return;
+
+    setState(() {
+      _isLoadingMoreSearch = true;
+    });
+
+    // 模拟网络延迟
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (!mounted) return;
+
+      final startIndex = _searchResults.length;
+      final endIndex = _allSearchResults.length > startIndex + _searchPageSize
+          ? startIndex + _searchPageSize
+          : _allSearchResults.length;
+
+      if (startIndex < endIndex) {
+        final newIndices = _allSearchResults.sublist(startIndex, endIndex);
+        final newMessages =
+            newIndices.map((index) => _allMessages[index]).toList();
+
+        setState(() {
+          _searchResults.addAll(List<int>.from(newIndices));
+          _displaySearchMessages.addAll(newMessages);
+          _currentSearchPage++;
+          _hasMoreSearchResults = endIndex < _allSearchResults.length;
+          _isLoadingMoreSearch = false;
+        });
+      } else {
+        setState(() {
+          _hasMoreSearchResults = false;
+          _isLoadingMoreSearch = false;
+        });
       }
     });
   }
@@ -959,47 +1123,48 @@ class _ChatScreenState extends State<ChatScreen> {
   // 跳转到下一个搜索结果
   void _nextSearchResult() {
     if (_searchResults.isEmpty) return;
-    setState(() {
-      _currentSearchIndex = (_currentSearchIndex + 1) % _searchResults.length;
-      _highlightedMessageIndex = _searchResults[_currentSearchIndex];
-      _scrollToSearchMessage(_searchResults[_currentSearchIndex]);
-    });
+
+    int nextIndex = (_currentSearchIndex + 1) % _searchResults.length;
+
+    // 如果下一个结果不在当前加载的页面中，需要加载更多
+    if (nextIndex >= _displaySearchMessages.length && _hasMoreSearchResults) {
+      _loadMoreSearchResults();
+      // 等待加载完成后设置高亮
+      Future.delayed(const Duration(milliseconds: 600), () {
+        setState(() {
+          _currentSearchIndex = nextIndex;
+          _highlightedMessageIndex = nextIndex;
+          _scrollToDisplayedSearchMessage(nextIndex);
+        });
+      });
+    } else {
+      setState(() {
+        _currentSearchIndex = nextIndex;
+        _highlightedMessageIndex = nextIndex;
+        _scrollToDisplayedSearchMessage(nextIndex);
+      });
+    }
   }
 
   // 跳转到上一个搜索结果
   void _previousSearchResult() {
     if (_searchResults.isEmpty) return;
+
     setState(() {
       _currentSearchIndex = (_currentSearchIndex - 1 + _searchResults.length) %
           _searchResults.length;
-      _highlightedMessageIndex = _searchResults[_currentSearchIndex];
-      _scrollToSearchMessage(_searchResults[_currentSearchIndex]);
+      _highlightedMessageIndex = _currentSearchIndex;
+      _scrollToDisplayedSearchMessage(_currentSearchIndex);
     });
   }
 
-  // 滚动到指定消息 (用于正常模式)
-  void _scrollToMessage(int index) {
-    // 计算反转列表中的实际位置
-    final actualIndex = _messages.length - 1 - index;
+  // 滚动到显示中的搜索消息
+  void _scrollToDisplayedSearchMessage(int index) {
+    if (index >= _displaySearchMessages.length) return;
 
-    // 延迟执行以确保列表已经构建完成
-    Future.delayed(const Duration(milliseconds: 100), () {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          actualIndex * 100.0, // 估计每个消息的高度
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeInOut,
-        );
-      }
-    });
-  }
+    // 计算在当前显示列表中的位置
+    final actualIndex = _displaySearchMessages.length - 1 - index;
 
-  // 滚动到搜索结果消息 (用于搜索模式)
-  void _scrollToSearchMessage(int index) {
-    // 计算反转列表中的实际位置
-    final actualIndex = _searchMessagesSnapshot.length - 1 - index;
-
-    // 延迟执行以确保列表已经构建完成
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_searchScrollController.hasClients) {
         _searchScrollController.animateTo(
@@ -1015,17 +1180,33 @@ class _ChatScreenState extends State<ChatScreen> {
     _textController.clear();
     if (text.trim().isEmpty) return;
 
+    final newMessage = ChatMessage(
+      text: text,
+      isSentByMe: true,
+      time: DateTime.now(),
+    );
+
     setState(() {
-      _messages.add(
-        ChatMessage(
-          text: text,
-          isSentByMe: true,
-          time: DateTime.now(),
-        ),
-      );
+      _allMessages.add(newMessage);
+      _displayMessages.add(newMessage);
+
+      // 如果在搜索模式，检查是否匹配搜索条件
+      if (_isSearching && _searchController.text.isNotEmpty) {
+        if (newMessage.text
+            .toLowerCase()
+            .contains(_searchController.text.toLowerCase())) {
+          _allSearchResults.add(_allMessages.length - 1);
+
+          // 如果当前页面已显示所有匹配消息，添加这条新消息
+          if (!_hasMoreSearchResults) {
+            _displaySearchMessages.add(newMessage);
+            _searchResults.add(_allMessages.length - 1);
+          }
+        }
+      }
     });
 
-    // 如果不在搜索模式，或者用户主动发送消息，则滚动到底部
+    // 如果不在搜索模式，则滚动到底部
     if (!_isSearching) {
       _shouldScrollToBottom = true;
       _scrollToBottom();
@@ -1047,14 +1228,16 @@ class _ChatScreenState extends State<ChatScreen> {
               setState(() {
                 _isSearching = !_isSearching;
                 if (_isSearching) {
-                  // 进入搜索模式时，创建消息列表快照
-                  _searchMessagesSnapshot = List<ChatMessage>.from(_messages);
-                } else {
-                  _searchController.clear();
+                  // 进入搜索模式初始化
+                  _displaySearchMessages = [];
+                  _allSearchResults = [];
                   _searchResults = [];
                   _currentSearchIndex = -1;
                   _highlightedMessageIndex = null;
-                  _searchMessagesSnapshot = [];
+                  _hasMoreSearchResults = false;
+                  _currentSearchPage = 1;
+                } else {
+                  _searchController.clear();
                   // 退出搜索模式时，恢复自动滚动到底部
                   _shouldScrollToBottom = true;
                   _scrollToBottom();
@@ -1087,9 +1270,17 @@ class _ChatScreenState extends State<ChatScreen> {
                       controller: _scrollController,
                       padding: const EdgeInsets.all(8.0),
                       reverse: true, // 新消息显示在底部
-                      itemCount: _messages.length,
+                      itemCount:
+                          _displayMessages.length + (_hasMoreMessages ? 1 : 0),
                       itemBuilder: (context, index) {
-                        final message = _messages[_messages.length - 1 - index];
+                        // 显示加载指示器
+                        if (_hasMoreMessages &&
+                            index == _displayMessages.length) {
+                          return _buildLoadingIndicator();
+                        }
+
+                        final message = _displayMessages[
+                            _displayMessages.length - 1 - index];
                         return _buildMessageItem(message, false);
                       },
                     ),
@@ -1102,13 +1293,20 @@ class _ChatScreenState extends State<ChatScreen> {
                       controller: _searchScrollController,
                       padding: const EdgeInsets.all(8.0),
                       reverse: true, // 新消息显示在底部
-                      itemCount: _searchMessagesSnapshot.length,
+                      itemCount: _displaySearchMessages.length +
+                          (_hasMoreSearchResults ? 1 : 0),
                       itemBuilder: (context, index) {
-                        final messageIndex =
-                            _searchMessagesSnapshot.length - 1 - index;
-                        final message = _searchMessagesSnapshot[messageIndex];
+                        // 显示加载指示器
+                        if (_hasMoreSearchResults &&
+                            index == _displaySearchMessages.length) {
+                          return _buildLoadingIndicator();
+                        }
+
+                        final displayIndex =
+                            _displaySearchMessages.length - 1 - index;
+                        final message = _displaySearchMessages[displayIndex];
                         final isHighlighted =
-                            _highlightedMessageIndex == messageIndex;
+                            _highlightedMessageIndex == displayIndex;
                         return _buildMessageItem(message, isHighlighted);
                       },
                     ),
@@ -1122,10 +1320,6 @@ class _ChatScreenState extends State<ChatScreen> {
                           setState(() {
                             _isSearching = false;
                             _searchController.clear();
-                            _searchResults = [];
-                            _currentSearchIndex = -1;
-                            _highlightedMessageIndex = null;
-                            _searchMessagesSnapshot = [];
                             _shouldScrollToBottom = true;
                             _scrollToBottom();
                           });
@@ -1143,6 +1337,15 @@ class _ChatScreenState extends State<ChatScreen> {
           _buildInputArea(),
         ],
       ),
+    );
+  }
+
+  // 构建加载指示器
+  Widget _buildLoadingIndicator() {
+    return Container(
+      padding: const EdgeInsets.all(16.0),
+      alignment: Alignment.center,
+      child: const CircularProgressIndicator(),
     );
   }
 
