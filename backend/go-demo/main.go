@@ -44,5 +44,6 @@ func say() {
 }
 
 func main() {
-	test.StartWorker()
+	// test.StartWorker()
+	test.TestDivide()
 }
