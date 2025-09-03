@@ -479,7 +479,7 @@
 
         modal.innerHTML = `
           <div class="modal-content">
-            <button class="close-btn" onclick="closeModal(this)">&times;</button>
+            <button class="close-btn">&times;</button>
             <img class="modal-image" src="${data.src}" alt="${data.title}">
             <div class="modal-info">
               <h2 class="modal-title">${data.title}</h2>
@@ -490,6 +490,25 @@
 
         modalOverlay.appendChild(modal);
         activeModals.set(data.id, modal);
+
+        // 添加关闭按钮事件监听器
+        const closeBtn = modal.querySelector(".close-btn");
+        closeBtn.addEventListener("click", (e) => {
+          e.stopPropagation();
+          closeModalElement(modal);
+        });
+        closeBtn.addEventListener("touchend", (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          closeModalElement(modal);
+        });
+
+        // 添加模态框点击外部关闭功能
+        modal.addEventListener("click", (e) => {
+          if (e.target === modal) {
+            closeModalElement(modal);
+          }
+        });
 
         // 触发动画
         setTimeout(() => {
@@ -523,8 +542,7 @@
 
       // 触摸事件处理
       function handleTouchStart(e) {
-        e.preventDefault();
-
+        // 不阻止默认行为，让点击事件正常工作
         Array.from(e.changedTouches).forEach((touch) => {
           touchPoints.set(touch.identifier, {
             x: touch.clientX,
@@ -537,8 +555,7 @@
       }
 
       function handleTouchEnd(e) {
-        e.preventDefault();
-
+        // 不阻止默认行为，让点击事件正常工作
         Array.from(e.changedTouches).forEach((touch) => {
           const touchData = touchPoints.get(touch.identifier);
           if (touchData) {
@@ -562,8 +579,23 @@
 
       function handleTouchClick(x, y) {
         const element = document.elementFromPoint(x, y);
-        const card = element.closest(".image-card");
 
+        // 检查是否点击了关闭按钮
+        const closeBtn = element.closest(".close-btn");
+        if (closeBtn) {
+          closeModal(closeBtn);
+          return;
+        }
+
+        // 检查是否点击了模态框外部
+        const modal = element.closest(".modal");
+        if (modal && element === modal) {
+          closeModalElement(modal);
+          return;
+        }
+
+        // 检查是否点击了图片卡片
+        const card = element.closest(".image-card");
         if (card) {
           const id = parseInt(card.dataset.id);
           const data = imageData.find((item) => item.id === id);
@@ -594,16 +626,26 @@
         }
       });
 
-      // 添加触摸事件监听器
+      // 添加触摸事件监听器（只用于触摸指示器，不干扰点击事件）
       document.addEventListener("touchstart", handleTouchStart, {
-        passive: false,
+        passive: true,
       });
       document.addEventListener("touchend", handleTouchEnd, {
-        passive: false,
+        passive: true,
       });
-      document.addEventListener("touchmove", (e) => e.preventDefault(), {
-        passive: false,
-      });
+
+      // 只阻止页面滚动，不阻止点击事件
+      document.addEventListener(
+        "touchmove",
+        (e) => {
+          if (e.touches.length > 1) {
+            e.preventDefault();
+          }
+        },
+        {
+          passive: false,
+        }
+      );
 
       // 初始化页面
       initPage();
