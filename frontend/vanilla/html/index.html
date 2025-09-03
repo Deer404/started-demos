@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>多点触控互动大屏</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "SF Pro Display", -apple-system, BlinkMacSystemFont,
+          "Segoe UI", Roboto, sans-serif;
+        background: #0a0a0a;
+        overflow: hidden;
+        height: 100vh;
+        touch-action: none;
+        position: relative;
+      }
+
+      /* 动态背景 */
+      .background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+            circle at 20% 50%,
+            #1a1a2e 0%,
+            transparent 50%
+          ),
+          radial-gradient(circle at 80% 20%, #16213e 0%, transparent 50%),
+          radial-gradient(circle at 40% 80%, #0f3460 0%, transparent 50%),
+          linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+        z-index: -2;
+      }
+
+      .background::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="%23ffffff" stroke-width="0.1" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        opacity: 0.3;
+        z-index: -1;
+      }
+
+      .container {
+        width: 100vw;
+        height: 100vh;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+        gap: 30px;
+        padding: 40px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .image-card {
+        position: relative;
+        border-radius: 24px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      }
+
+      .image-card:hover {
+        transform: translateY(-8px) scale(1.02);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+        border-color: rgba(255, 255, 255, 0.2);
+      }
+
+      .image-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          135deg,
+          rgba(255, 255, 255, 0.1) 0%,
+          transparent 50%
+        );
+        z-index: 1;
+        pointer-events: none;
+      }
+
+      .image-card img {
+        width: 100%;
+        height: 70%;
+        object-fit: cover;
+        transition: transform 0.4s ease;
+      }
+
+      .image-card:hover img {
+        transform: scale(1.1);
+      }
+
+      .card-content {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 24px;
+        background: linear-gradient(
+          to top,
+          rgba(0, 0, 0, 0.8) 0%,
+          transparent 100%
+        );
+        z-index: 2;
+      }
+
+      .card-title {
+        font-size: 1.8em;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 8px;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+      }
+
+      .card-description {
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.5;
+        font-size: 0.95em;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+      }
+
+      /* 独立弹窗系统 */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        pointer-events: none;
+        z-index: 1000;
+      }
+
+      .modal {
+        position: absolute;
+        width: 450px;
+        height: 600px;
+        background: rgba(20, 20, 20, 0.95);
+        backdrop-filter: blur(30px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+        transform: scale(0.8);
+        opacity: 0;
+        transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        pointer-events: auto;
+        overflow: hidden;
+      }
+
+      .modal.active {
+        transform: scale(1);
+        opacity: 1;
+      }
+
+      .modal-content {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+
+      .modal-image {
+        width: 100%;
+        height: 60%;
+        object-fit: cover;
+        flex-shrink: 0;
+      }
+
+      .modal-info {
+        flex: 1;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .modal-title {
+        font-size: 1.8em;
+        font-weight: 700;
+        color: #ffffff;
+        margin-bottom: 16px;
+      }
+
+      .modal-description {
+        color: rgba(255, 255, 255, 0.8);
+        line-height: 1.6;
+        font-size: 1em;
+        flex: 1;
+      }
+
+      .close-btn {
+        position: absolute;
+        top: 16px;
+        right: 16px;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        z-index: 10;
+      }
+
+      .close-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(1.1);
+      }
+
+      .touch-indicator {
+        position: absolute;
+        width: 80px;
+        height: 80px;
+        border: 2px solid rgba(255, 255, 255, 0.6);
+        border-radius: 50%;
+        pointer-events: none;
+        transform: translate(-50%, -50%);
+        opacity: 0;
+        transition: opacity 0.2s ease;
+        z-index: 2000;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+      }
+
+      .touch-indicator.active {
+        opacity: 1;
+        animation: ripple 0.8s ease-out infinite;
+      }
+
+      @keyframes ripple {
+        0% {
+          transform: translate(-50%, -50%) scale(0.8);
+          opacity: 1;
+        }
+        100% {
+          transform: translate(-50%, -50%) scale(1.5);
+          opacity: 0;
+        }
+      }
+
+      .header {
+        position: absolute;
+        top: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        text-align: center;
+        z-index: 100;
+      }
+
+      .header h1 {
+        font-size: 3.5em;
+        font-weight: 800;
+        margin-bottom: 12px;
+        background: linear-gradient(135deg, #ffffff 0%, #a0a0a0 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: none;
+      }
+
+      .header p {
+        font-size: 1.3em;
+        opacity: 0.7;
+        font-weight: 300;
+      }
+
+      @media (max-width: 1200px) {
+        .container {
+          grid-template-columns: repeat(2, 1fr);
+          grid-template-rows: repeat(3, 1fr);
+          gap: 20px;
+          padding: 30px;
+        }
+
+        .modal {
+          width: 380px;
+          height: 520px;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          grid-template-columns: 1fr;
+          grid-template-rows: repeat(6, 1fr);
+          gap: 15px;
+          padding: 20px;
+        }
+
+        .header h1 {
+          font-size: 2.5em;
+        }
+
+        .header p {
+          font-size: 1.1em;
+        }
+
+        .modal {
+          width: 320px;
+          height: 480px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 动态背景 -->
+    <div class="background"></div>
+
+    <div class="header">
+      <h1>多点触控互动大屏</h1>
+      <p>支持多人同时操作，点击图片查看详情</p>
+    </div>
+
+    <div class="container" id="container">
+      <!-- 图片卡片将通过JavaScript动态生成 -->
+    </div>
+
+    <!-- 模态框容器 -->
+    <div class="modal-overlay" id="modalOverlay"></div>
+
+    <!-- 触摸指示器 -->
+    <div class="touch-indicator" id="touchIndicator"></div>
+
+    <script>
+      // 图片数据
+      const imageData = [
+        {
+          id: 1,
+          src: "https://picsum.photos/600/400?random=1",
+          title: "自然风光",
+          description:
+            "这是一张美丽的自然风光照片，展现了大自然的壮丽景色。山川河流在阳光的照耀下显得格外迷人，让人心旷神怡。这样的景色总是能够让人忘却城市的喧嚣，回归内心的宁静。在这片广袤的土地上，每一处风景都诉说着大自然的神奇与美妙。",
+        },
+        {
+          id: 2,
+          src: "https://picsum.photos/600/400?random=2",
+          title: "城市建筑",
+          description:
+            "现代化的城市建筑群，展现了人类文明的发展成果。高楼大厦鳞次栉比，在夜晚的灯光映衬下显得格外璀璨。这些建筑不仅是居住和工作的场所，更是城市文化的象征。每一座建筑都承载着设计师的理念和城市发展的历史。",
+        },
+        {
+          id: 3,
+          src: "https://picsum.photos/600/400?random=3",
+          title: "海洋世界",
+          description:
+            "深蓝的海洋孕育着无数生命，波涛汹涌的海面下隐藏着神秘的世界。海洋占据了地球表面的大部分，是生命的摇篮，也是人类探索的最后边疆之一。在这片蔚蓝的世界里，每一滴海水都蕴含着生命的奥秘。",
+        },
+        {
+          id: 4,
+          src: "https://picsum.photos/600/400?random=4",
+          title: "森林秘境",
+          description:
+            "茂密的森林是地球的肺部，为我们提供新鲜的空气。在这片绿色的海洋中，各种动植物和谐共存，形成了完整的生态系统。每一棵树都有自己的故事，每一片叶子都承载着生命的奇迹。森林中的每一个角落都充满了生机与活力。",
+        },
+        {
+          id: 5,
+          src: "https://picsum.photos/600/400?random=5",
+          title: "星空银河",
+          description:
+            "浩瀚的星空总是让人产生无限遐想，银河系中的每一颗星星都可能孕育着生命。在这个宁静的夜晚，仰望星空，我们不禁思考着宇宙的奥秘和人类在其中的位置。星空下的我们显得如此渺小，却又如此珍贵。",
+        },
+        {
+          id: 6,
+          src: "https://picsum.photos/600/400?random=6",
+          title: "花园春色",
+          description:
+            "春天的花园里百花齐放，各种颜色的花朵竞相开放，为大地披上了五彩斑斓的外衣。蜜蜂和蝴蝶在花丛中翩翩起舞，这是大自然最美好的季节，充满了生机和希望。每一朵花都在诉说着春天的故事。",
+        },
+      ];
+
+      let activeModals = new Map();
+      let touchPoints = new Map();
+      let modalPositions = [
+        { x: 100, y: 100 },
+        { x: 600, y: 150 },
+        { x: 1100, y: 100 },
+        { x: 200, y: 400 },
+        { x: 700, y: 450 },
+        { x: 1000, y: 400 },
+      ];
+      let usedPositions = new Set();
+
+      // 初始化页面
+      function initPage() {
+        const container = document.getElementById("container");
+
+        imageData.forEach((item) => {
+          const card = createImageCard(item);
+          container.appendChild(card);
+        });
+      }
+
+      // 创建图片卡片
+      function createImageCard(data) {
+        const card = document.createElement("div");
+        card.className = "image-card";
+        card.dataset.id = data.id;
+
+        card.innerHTML = `
+          <img src="${data.src}" alt="${data.title}">
+          <div class="card-content">
+            <h3 class="card-title">${data.title}</h3>
+            <p class="card-description">${data.description.substring(
+              0,
+              80
+            )}...</p>
+          </div>
+        `;
+
+        // 添加点击事件
+        card.addEventListener("click", (e) => openModal(data, e));
+
+        return card;
+      }
+
+      // 获取可用的模态框位置
+      function getAvailablePosition() {
+        for (let i = 0; i < modalPositions.length; i++) {
+          if (!usedPositions.has(i)) {
+            usedPositions.add(i);
+            return { ...modalPositions[i], index: i };
+          }
+        }
+
+        // 如果所有位置都被占用，随机生成一个位置
+        const randomX = Math.random() * (window.innerWidth - 450);
+        const randomY = Math.random() * (window.innerHeight - 600);
+        return { x: randomX, y: randomY, index: -1 };
+      }
+
+      // 释放模态框位置
+      function releasePosition(index) {
+        if (index >= 0) {
+          usedPositions.delete(index);
+        }
+      }
+
+      // 打开模态框
+      function openModal(data, event) {
+        // 检查是否已经有相同的模态框打开
+        if (activeModals.has(data.id)) {
+          return;
+        }
+
+        const position = getAvailablePosition();
+        const modalOverlay = document.getElementById("modalOverlay");
+
+        // 创建新的模态框
+        const modal = document.createElement("div");
+        modal.className = "modal";
+        modal.dataset.id = data.id;
+        modal.dataset.positionIndex = position.index;
+
+        // 设置位置
+        modal.style.left = position.x + "px";
+        modal.style.top = position.y + "px";
+
+        modal.innerHTML = `
+          <div class="modal-content">
+            <button class="close-btn" onclick="closeModal(this)">&times;</button>
+            <img class="modal-image" src="${data.src}" alt="${data.title}">
+            <div class="modal-info">
+              <h2 class="modal-title">${data.title}</h2>
+              <p class="modal-description">${data.description}</p>
+            </div>
+          </div>
+        `;
+
+        modalOverlay.appendChild(modal);
+        activeModals.set(data.id, modal);
+
+        // 触发动画
+        setTimeout(() => {
+          modal.classList.add("active");
+        }, 10);
+
+        // 防止事件冒泡
+        event.stopPropagation();
+      }
+
+      // 关闭模态框
+      function closeModal(button) {
+        const modal = button.closest(".modal");
+        closeModalElement(modal);
+      }
+
+      function closeModalElement(modal) {
+        const id = parseInt(modal.dataset.id);
+        const positionIndex = parseInt(modal.dataset.positionIndex);
+
+        modal.classList.remove("active");
+
+        setTimeout(() => {
+          if (modal.parentNode) {
+            modal.parentNode.removeChild(modal);
+          }
+          activeModals.delete(id);
+          releasePosition(positionIndex);
+        }, 400);
+      }
+
+      // 触摸事件处理
+      function handleTouchStart(e) {
+        e.preventDefault();
+
+        Array.from(e.changedTouches).forEach((touch) => {
+          touchPoints.set(touch.identifier, {
+            x: touch.clientX,
+            y: touch.clientY,
+            startTime: Date.now(),
+          });
+
+          showTouchIndicator(touch.clientX, touch.clientY);
+        });
+      }
+
+      function handleTouchEnd(e) {
+        e.preventDefault();
+
+        Array.from(e.changedTouches).forEach((touch) => {
+          const touchData = touchPoints.get(touch.identifier);
+          if (touchData) {
+            const duration = Date.now() - touchData.startTime;
+            const distance = Math.sqrt(
+              Math.pow(touch.clientX - touchData.x, 2) +
+                Math.pow(touch.clientY - touchData.y, 2)
+            );
+
+            // 如果是短时间内的小距离移动，认为是点击
+            if (duration < 500 && distance < 30) {
+              handleTouchClick(touch.clientX, touch.clientY);
+            }
+
+            touchPoints.delete(touch.identifier);
+          }
+
+          hideTouchIndicator();
+        });
+      }
+
+      function handleTouchClick(x, y) {
+        const element = document.elementFromPoint(x, y);
+        const card = element.closest(".image-card");
+
+        if (card) {
+          const id = parseInt(card.dataset.id);
+          const data = imageData.find((item) => item.id === id);
+          if (data) {
+            openModal(data, { stopPropagation: () => {} });
+          }
+        }
+      }
+
+      function showTouchIndicator(x, y) {
+        const indicator = document.getElementById("touchIndicator");
+        indicator.style.left = x + "px";
+        indicator.style.top = y + "px";
+        indicator.classList.add("active");
+      }
+
+      function hideTouchIndicator() {
+        const indicator = document.getElementById("touchIndicator");
+        indicator.classList.remove("active");
+      }
+
+      // 键盘事件处理
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape") {
+          activeModals.forEach((modal) => {
+            closeModalElement(modal);
+          });
+        }
+      });
+
+      // 添加触摸事件监听器
+      document.addEventListener("touchstart", handleTouchStart, {
+        passive: false,
+      });
+      document.addEventListener("touchend", handleTouchEnd, {
+        passive: false,
+      });
+      document.addEventListener("touchmove", (e) => e.preventDefault(), {
+        passive: false,
+      });
+
+      // 初始化页面
+      initPage();
+    </script>
+  </body>
+</html>
