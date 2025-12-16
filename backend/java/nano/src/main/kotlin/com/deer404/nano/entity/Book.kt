@@ -24,5 +24,5 @@ data class Book(
     @NotBlank
     @Size(min = 1, max = 20)
     @Column(nullable = false)
-    val author: String
+    val author: String,
 )
