@@ -8,7 +8,11 @@ export interface Todo {
 
 export type FilterType = 'all' | 'active' | 'completed' | 'today' | 'flagged';
 
+export interface PersistedTodo extends Omit<Todo, 'createdAt'> {
+  createdAt: string;
+}
+
 export interface TodoState {
-  todos: Todo[];
+  todos: PersistedTodo[];
   filter: FilterType;
 }
