@@ -97,3 +97,6 @@
 **/*.tmp
 **/*.bak
 **/*.swp
+
+# Nested local repos
+frontend/frameworks/tanstack-start-demo/
